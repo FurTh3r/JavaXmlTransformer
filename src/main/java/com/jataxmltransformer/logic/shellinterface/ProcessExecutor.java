@@ -1,62 +1,59 @@
 package com.jataxmltransformer.logic.shellinterface;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import com.jataxmltransformer.logs.AppLogger;
+
+import java.io.*;
 import java.util.List;
 
 /**
- * The {@code ProcessExecutor} class provides an implementation of the {@link CommandExecutor} interface.
- * This class is responsible for executing system commands or shell commands through the {@link ProcessBuilder} class.
- * It captures the output of the executed command and returns it as a {@link String}.
- * In case of an error, it throws a {@link RuntimeException} with the exit code and error output.
- *
- * <p>This implementation can be used to run shell commands on both Linux and Windows platforms.
- * It captures standard output and standard error streams and combines them into a single output.</p>
- *
- * <p>Example usage:</p>
- * <pre>
- *   ProcessExecutor executor = new ProcessExecutor();
- *   String output = executor.execute(Arrays.asList("ls", "-l"));
- *   System.out.println(output);
- * </pre>
+ * Executes shell commands in a new process, captures the output, and returns the result.
+ * The class uses the WSL (Windows Subsystem for Linux) for executing commands in a Linux environment.
  */
-public class ProcessExecutor implements CommandExecutor {
+public class ProcessExecutor implements ProcessExecutorInterface {
 
     /**
-     * Executes a command in the system shell and returns the output as a {@link String}.
+     * Executes a list of commands in a new shell process, captures the output,
+     * and returns the result as a string.
      *
-     * <p>The method creates a {@link ProcessBuilder} to run the command, captures the output
-     * from the standard output stream, and returns it as a string. If the command fails (i.e.,
-     * returns a non-zero exit code), a {@link RuntimeException} is thrown with the exit code
-     * and the error output.</p>
-     *
-     * @param command a list of strings representing the command and its arguments to be executed.
-     *                The first element is the command itself (e.g., "ls" or "cmd"), followed by
-     *                any arguments (e.g., "-l" or "/c dir").
-     * @return the output of the command as a {@link String}.
-     * @throws IOException if an I/O error occurs while starting or reading from the process.
-     * @throws InterruptedException if the current thread is interrupted while waiting for the process to complete.
-     * @throws RuntimeException if the command exits with a non-zero exit code, indicating failure.
+     * @param command The list of commands to be executed in the shell.
+     * @return The output of the executed commands.
+     * @throws IOException If an I/O error occurs during the execution.
+     * @throws InterruptedException If the execution is interrupted.
      */
     @Override
     public String execute(List<String> command) throws IOException, InterruptedException {
-        // Setting up the shell executor
-        ProcessBuilder processBuilder = new ProcessBuilder(command);
-        processBuilder.redirectErrorStream(true);
+        // Start a new process for each command, using WSL as the shell
+        ProcessBuilder processBuilder = new ProcessBuilder("wsl");
+        processBuilder.redirectErrorStream(true); // Redirects error stream to standard output
         Process process = processBuilder.start();
 
-        // Getting the output of the execution of the command to be returned
-        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-        StringBuilder output = new StringBuilder();
-        String line;
-        while ((line = reader.readLine()) != null)
-            output.append(line).append("\n");
+        // Use BufferedWriter for sending commands and BufferedReader for capturing output
+        try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
+             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
 
-        int exitCode = process.waitFor();
-        if (exitCode != 0)
-            throw new RuntimeException(process.exitValue() + ": " + output);
+            // Combine the commands into a single string, separated by '&&' to chain them
+            String commandStr = String.join(" && ", command);
+            writer.write(commandStr + "\n");
+            writer.flush(); // Send the command to the shell
 
-        return output.toString();
+            // StringBuilder to store the output of the command execution
+            StringBuilder output = new StringBuilder();
+            String line;
+
+            // Read each line of the output from the shell process
+            while ((line = reader.readLine()) != null && !line.equals("EXIT")) { // NOTE: EXIT is a custom EOL!
+                AppLogger.info("Output: " + line); // Print each line of output for debugging
+                output.append(line).append("\n");
+            }
+
+            // Return the captured output as a string
+            return output.toString();
+        } catch (IOException e) {
+            AppLogger.severe(e.getMessage());
+            throw e; // Rethrow the exception after logging it
+        } finally {
+            process.destroy(); // Ensure the process is destroyed after execution
+            AppLogger.info("Process destroyed. Terminated execution.");
+        }
     }
 }
