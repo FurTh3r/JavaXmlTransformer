@@ -40,9 +40,8 @@ public class CDucePlaceholderReplacer {
     public CDucePlaceholderReplacer(String cduceCodeInput, String cduceCodeOutput) {
         Dotenv dotenv = Dotenv.load();
         String basePath = dotenv.get("CDUCE_CODE_PATH");
-        if (basePath == null) {
+        if (basePath == null)
             throw new NullPointerException("CDUCE_CODE_PATH environment variable is not set.");
-        }
         this.cduceCodeInputPath = basePath + cduceCodeInput;
         this.cduceCodeOutputPath = basePath + cduceCodeOutput;
     }
@@ -72,9 +71,9 @@ public class CDucePlaceholderReplacer {
              BufferedWriter writer = new BufferedWriter(new FileWriter(cduceCodeOutputPath))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                for (Map.Entry<String, String> placeholder : placeholders.entrySet()) {
+                for (Map.Entry<String, String> placeholder : placeholders.entrySet())
                     line = line.replace(placeholder.getKey(), placeholder.getValue());
-                }
+
                 writer.write(line);
                 writer.newLine();
             }
@@ -112,9 +111,8 @@ public class CDucePlaceholderReplacer {
 
         if (outputFile.exists()) {
             boolean isDeleted = outputFile.delete();
-            if (!isDeleted) {
+            if (!isDeleted)
                 AppLogger.warning("Failed to delete the output file: " + filePath);
-            }
         } else {
             AppLogger.info("Output file does not exist: " + filePath);
         }

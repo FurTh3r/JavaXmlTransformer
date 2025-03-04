@@ -31,7 +31,7 @@ public class PathUtility {
      */
     public static String convertToWslPath(String windowsPath) {
         if (windowsPath.contains(":\\")) {
-            // Extract drive letter and replace backslashes
+            // Extract a drive letter and replace backslashes
             String drive = windowsPath.substring(0, 1).toLowerCase(); // Extract "C" and convert to lowercase
             String path = windowsPath.substring(2).replace("\\", "/"); // Remove "C:" and replace backslashes
             return "/mnt/" + drive + path;

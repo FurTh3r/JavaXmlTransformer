@@ -32,7 +32,7 @@ public class Ontology {
     /**
      * Constructs an {@code Ontology} object with the specified name and extension.
      *
-     * @param ontologyName The name of the ontology.
+     * @param ontologyName      The name of the ontology.
      * @param ontologyExtension The extension of the ontology (e.g., ".xml").
      */
     public Ontology(String ontologyName, String ontologyExtension) {
@@ -102,9 +102,8 @@ public class Ontology {
      * @throws IOException If an error occurs during file writing.
      */
     public void saveXmlToFile(String filePath) throws IOException {
-        if (xmlData == null || xmlData.isEmpty()) {
+        if (xmlData == null || xmlData.isEmpty())
             throw new IOException("XML data is empty or not set.");
-        }
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             writer.write(xmlData);
@@ -125,9 +124,8 @@ public class Ontology {
 
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
-            while ((line = reader.readLine()) != null) {
+            while ((line = reader.readLine()) != null)
                 xmlBuilder.append(line).append("\n");
-            }
         } catch (FileNotFoundException e) {
             throw new IOException("File not found: " + filePath, e);
         } catch (IOException e) {
