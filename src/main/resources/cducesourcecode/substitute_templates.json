@@ -1,0 +1,6 @@
+{
+  "FILTER_ATTRIBUTES": "| (s & {PLACEHOLDER}, rest) -> [s] @ filter_valid_attributes rest",
+  "FILTER_CLASSES": "| ({PLACEHOLDER} (att & [ AnyXml* ]), rest) ->\n        let valid_attributes = filter_valid_attributes att in\n        if not (valid_attributes = []) then\n          [{PLACEHOLDER} valid_attributes] @ filter_valid_classes rest\n        else\n          (\n            filter_valid_classes rest\n          )",
+  "ENTRYPOINT_VERIFY": "if (validate_elements xml_file) then\n  print \"VALID ONTOLOGY\\n\"\nelse\n  print \"INVALID ONTOLOGY\\n\";;",
+  "ENTRYPOINT_TRANSFORM": "(* Verify ontology validity and transform if necessary *)\nlet valid_ontology = verify_and_transform_ontology xml_file;;\n\n(* Save the transformed ontology if valid *)\nif (validate_elements valid_ontology) then\n  (\n    print \"FILE SAVED\\n\";\n    dump_to_file_utf8 \"{OUTPUT_FILE_PLACEHOLDER}\" (print_xml_utf8 valid_ontology)\n  )\nelse\n  print \"FAILED\\n\";;"
+}

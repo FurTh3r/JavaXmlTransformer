@@ -1,0 +1,88 @@
+(* Declaration of Namespace: Unique identifiers that associate a prefix to a URI *)
+namespace skos = "http://www.w3.org/2004/02/skos/core#";;
+namespace owl = "http://www.w3.org/2002/07/owl#";;
+namespace rdf = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";;
+namespace xml = "http://www.w3.org/XML/1998/namespace";;
+namespace xsd = "http://www.w3.org/2001/XMLSchema#";;
+namespace rdfs = "http://www.w3.org/2000/01/rdf-schema#";;
+{NAMESPACE_PLACEHOLDER}
+
+(* Define the ontology structure using CDuce's type system. *)
+{STRUCTURE_PLACEHOLDER}
+;;
+
+(* Function to safely load an XML file with error handling *)
+let fun safe_load_xml (path : Latin1) : AnyXml =
+  try
+    let ret_val = load_xml path in  (* Attempt to load the XML file *)
+    print "LOADED\n";
+    ret_val                         (* Return the loaded XML *)
+  with
+    _ ->
+      print "SYNTAX ERROR\n";  (* Print error message *)
+      <rdf:RDF xml:base="Default"> [];;  (* Return an empty RDF structure in case of an error *)
+
+(* Function to validate if an XML structure conforms to the ontology definition (Dynamic check) *)
+let fun validate_elements (input : AnyXml) : Bool =
+  match input with
+    | _ & Ontology -> `true  (* If input matches the Ontology type, return true *)
+    | _ -> `false;;          (* Otherwise, return false *)
+
+(* Function to filter valid attributes of a class *)
+let fun filter_valid_attributes (atts : [ AnyXml* ]) : [ AnyXml* ] =
+  match atts with
+    | [] -> []                                  (* Return empty list if there are no attributes *)
+    {FILTER_ATTRIBUTES_PLACEHOLDER}
+    | (_ , rest)           -> (
+        print_utf8 ("Removing non-valid element\n");
+        filter_valid_attributes rest     (* Discard invalid attributes *)
+      );;
+
+(* Function to filter only valid classes with at least one valid attribute *)
+let fun filter_valid_classes (classes : [ AnyXml* ]) : [ AnyXml* ] =
+  match classes with
+    | [] -> [] (* Check for empty structures *)
+    {FILTER_CLASSES_PLACEHOLDER}
+    | (_, rest) ->
+          (
+            print "Removing non-owl:Class element\n";
+            filter_valid_classes rest  (* Remove non-owl:Class elements *)
+          );;
+
+(* Function to transform the ontology, keeping only compatible and valid elements *)
+let fun transform_compatible_elements (ontology : AnyXml) : AnyXml =
+  match ontology with
+    | <rdf:RDF xml:base=uri> (classes & [ AnyXml* ]) ->
+        print "Processing RDF structure...\n";  (* Debugging output for compatible input *)
+        let transformed_classes = filter_valid_classes classes in (* Transfroming the Ontology *)
+          <rdf:RDF xml:base=uri> transformed_classes (* Return the transformed RDF structure *)
+    | _ ->
+        print "Non-compatible RDF structure\n";  (* Debugging output for non-compatible input *)
+        <rdf:RDF xml:base="Default"> [];;  (* Return an empty RDF structure if input is invalid *)
+
+(* Function to validate and transform the ontology if needed. Note: If transforming fails it returns the input Xml *)
+let fun verify_and_transform_ontology (input : AnyXml) : AnyXml =
+    if (validate_elements input) then
+      (
+        input (* If ontology is valid, return it *)
+      )
+    else
+      (
+        let transformed = transform_compatible_elements input in
+          if (validate_elements transformed) then
+            (
+              transformed (* If valid after transforming, return *)
+            )
+          else
+            (
+              input (* If still invalid, return the original input *)
+            )
+      );;
+
+(* Main entry point to load and validate the XML file. *)
+(* Load the XML ontology file safely *)
+let xml_file = safe_load_xml "{INPUT_FILE_PLACEHOLDER}";;
+
+{ENTRYPOINT_PLACEHOLDER}
+
+print "EXIT\n";;
