@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jataxmltransformer.GUI.StructureHandlerController"
+            stylesheets="@styles.css">
+    <VBox spacing="10" AnchorPane.topAnchor="10" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10">
+        <Label text="Struttura"/>
+        <ListView fx:id="structureListView" editable="true" prefHeight="150" prefWidth="300"/>
+        <HBox spacing="10">
+            <Button text="Aggiungi" onAction="#addStructureLine"/>
+            <Button text="Rimuovi" onAction="#removeStructureLine"/>
+        </HBox>
+
+        <Label text="Classi e Attributi"/>
+        <ListView fx:id="classAttributesListView" editable="true" prefHeight="150" prefWidth="300"/>
+        <HBox spacing="10">
+            <ComboBox fx:id="typeOfElement"/>
+            <Button text="Aggiungi" onAction="#addClassAttributeLine"/>
+            <Button text="Rimuovi" onAction="#removeClassAttributeLine"/>
+        </HBox>
+
+        <HBox spacing="10">
+            <Button text="Load from JSON" onAction="#loadStructure"/>
+            <Button text="Save to JSON" onAction="#saveStructure"/>
+        </HBox>
+    </VBox>
+</AnchorPane>
