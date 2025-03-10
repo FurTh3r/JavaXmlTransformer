@@ -1,0 +1,63 @@
+/* Generale */
+.root {
+    -fx-background-color: #f0f8ff; /* Azzurrino chiaro */
+    -fx-font-family: "Arial";
+}
+
+/* TabPane */
+.tab-pane {
+    -fx-tab-min-width: 120px;
+    -fx-tab-max-width: 200px;
+    -fx-background-color: white;
+}
+
+.tab {
+    -fx-background-color: #d0e7ff; /* Azzurrino più scuro */
+    -fx-text-fill: white; /* Testo bianco */
+    -fx-font-weight: bold;
+}
+
+.tab:selected {
+    -fx-background-color: #a6d5ff; /* Azzurrino più intenso */
+    -fx-text-fill: white;
+}
+
+/* Labels */
+.label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #003366;
+}
+
+/* ListView */
+.list-view {
+    -fx-background-color: #e6f2ff; /* Azzurrino chiaro */
+    -fx-border-color: #a6d5ff;
+    -fx-border-radius: 5;
+}
+
+/* TextArea */
+.text-area {
+    -fx-control-inner-background: white;
+    -fx-border-color: #a6d5ff;
+    -fx-border-radius: 5;
+}
+
+/* TextField */
+.text-field {
+    -fx-background-color: white;
+    -fx-border-color: #a6d5ff;
+    -fx-border-radius: 5;
+}
+
+/* Bottoni */
+.button {
+    -fx-background-color: #a6d5ff;
+    -fx-text-fill: white; /* Testo bianco */
+    -fx-font-weight: bold;
+    -fx-border-radius: 5;
+    -fx-padding: 5 10;
+}
+
+.button:hover {
+    -fx-background-color: #75b6f0;
+}
