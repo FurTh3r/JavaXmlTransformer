@@ -2,7 +2,9 @@ package com.jataxmltransformer.middleware;
 
 import com.jataxmltransformer.logic.cducecompiler.CDuceCodeLoader;
 import com.jataxmltransformer.logic.cducecompiler.CDuceCommandExecutor;
+import com.jataxmltransformer.logic.data.EditedElement;
 import com.jataxmltransformer.logic.data.Ontology;
+import com.jataxmltransformer.logic.xml.XMLDiffChecker;
 
 import java.io.IOException;
 import java.util.List;
@@ -46,7 +48,7 @@ public class Middleware {
         CDuceCommandExecutor executor = new CDuceCommandExecutor();
         Ontology ontology = new Ontology();
         ontology.setOntologyName("try");
-        ontology.setOntologyExtension(".rdf");
+        ontology.setOntologyExtension(".rdf"); // TODO Test syntax error?????????????????????????????????????????????????
         ontology.setXmlData("<?xml version=\"1.0\"?>\n" +
                 "<rdf:RDF xmlns=\"http://www.persone/\"\n" +
                 "         xml:base=\"http://www.persone/\"\n" +
@@ -60,6 +62,11 @@ public class Middleware {
                 "    <rdfs:subClassOf rdf:resource=\"http://www.persone#Individuo\"/>\n" +
                 "    <rdfs:label xml:lang=\"en\">Person</rdfs:label>\n" +
                 "    <skos:scopeNote xml:lang=\"en\">This class represents a person</skos:scopeNote>\n" +
+                "    <!-- Classe Individuo -->\n" +
+                "    <owl:Class rdf:about=\"http://www.persone#Individuo\">\n" +
+                "      <rdfs:label xml:lang=\"it\">Individuo</rdfs:label>\n" +
+                "      <skos:scopeNote xml:lang=\"it\">Questa classe rappresenta un individuo</skos:scopeNote>\n" +
+                "    </owl:Class>\n" +
                 "  </owl:Class>\n" +
                 "\n" +
                 "  <!-- Classe Individuo -->\n" +
@@ -71,5 +78,18 @@ public class Middleware {
                 "</rdf:RDF>");
         executor.verifyOntology(ontology);
         executor.transformOntology(ontology);
+
+
+
+        // TEST DIFF XML
+
+        // TODO edit middleware to adapt to the new form of xml
+ /*
+        XMLDiffChecker checker = new XMLDiffChecker();
+        List<EditedElement> edit =
+                checker.diff("C:\\Users\\loryp\\Documents\\University\\Lezioni\\2024-2025\\Tesi\\JavaXmlTransformer\\XmlTransformer\\src\\main\\resources\\io\\ontology.xml",
+                        "C:\\Users\\loryp\\Documents\\University\\Lezioni\\2024-2025\\Tesi\\JavaXmlTransformer\\XmlTransformer\\src\\main\\resources\\io\\ontology_output.xml");
+
+*/
     }
 }

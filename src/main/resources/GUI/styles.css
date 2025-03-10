@@ -61,3 +61,52 @@
 .button:hover {
     -fx-background-color: #75b6f0;
 }
+
+/* Popup Styling */
+.popup {
+    -fx-background-color: rgba(0, 0, 0, 0.7); /* Black background with transparency */
+    -fx-background-insets: 0;
+    -fx-background-radius: 10;
+    -fx-border-color: #a6d5ff; /* Border color to match existing theme */
+    -fx-border-radius: 10;
+    -fx-padding: 10;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 10, 0, 0, 2); /* Subtle shadow for the popup */
+}
+
+/* Popup TextField */
+.popup .text-field {
+    -fx-background-color: white;
+    -fx-border-color: #a6d5ff;
+    -fx-border-radius: 5;
+}
+
+/* Popup Button */
+.popup .button {
+    -fx-background-color: #a6d5ff;
+    -fx-text-fill: white; /* Text in white */
+    -fx-font-weight: bold;
+    -fx-border-radius: 5;
+    -fx-padding: 5 10;
+}
+
+.popup .button:hover {
+    -fx-background-color: #75b6f0; /* Hover color */
+}
+
+/* Popup VBox */
+.popup .vbox {
+    -fx-spacing: 10;
+    -fx-alignment: center;
+}
+
+/* Popup HBox */
+.popup .hbox {
+    -fx-spacing: 10;
+    -fx-alignment: center;
+}
+
+/* Adjust the width and size of the popup */
+.popup .vbox {
+    -fx-pref-width: 400;
+    -fx-pref-height: 200;
+}

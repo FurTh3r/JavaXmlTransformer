@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="com.jataxmltransformer.GUI.PopupController" spacing="10"
+      stylesheets="@styles.css" styleClass="popup">
+    <HBox spacing="10">
+        <TextField fx:id="originalText" editable="false" prefWidth="150"/>
+        <TextField fx:id="editedText" prefWidth="150"/>
+    </HBox>
+    <HBox spacing="10">
+        <Button text="Save" fx:id="saveButton"/>
+        <Button text="Cancel" fx:id="cancelButton"/>
+        <Button text="Remove Line" fx:id="removeButton"/>
+    </HBox>
+</VBox>

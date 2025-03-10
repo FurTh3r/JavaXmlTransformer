@@ -2,16 +2,22 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.TextArea?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.HBox?>
 
+<?import javafx.scene.layout.VBox?>
 <AnchorPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jataxmltransformer.GUI.LoadVerifyController"
             stylesheets="@styles.css">
     <VBox spacing="10" AnchorPane.topAnchor="10" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10">
         <Label text="Carica Ontologia"/>
         <Button text="Carica File" onAction="#loadOntologyFile"/>
-        <TextArea fx:id="ontologyContentTextArea" prefHeight="300" prefWidth="500"/>
+
+        <!-- Use ListView for displaying ontology content -->
+        <ListView fx:id="ontologyListView" prefHeight="300" prefWidth="500"/>
+
         <Button text="Verifica" onAction="#verifyFile"/>
         <Label fx:id="statusLabel"/>
+
+        <!-- HBox for error buttons, will be used inside each ListView item -->
     </VBox>
 </AnchorPane>
