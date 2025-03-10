@@ -3,7 +3,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.AnchorPane?>
 <AnchorPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jataxmltransformer.GUI.MainController"
-            stylesheets="styles.css">
+            stylesheets="@styles.css">
     <TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE">
         <Tab text="Namespaces Handler"/>
         <Tab text="Gestione Classi e Attributi"/>
