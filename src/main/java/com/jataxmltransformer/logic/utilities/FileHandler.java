@@ -16,17 +16,16 @@ public class FileHandler {
      * Opens a file selection dialog and loads the content of the selected file as a string.
      *
      * @param extensionName The name of the file extension filter (e.g., "XML Files").
-     * @param extension     The allowed file extension (e.g., "*.xml").
+     * @param extensions    The allowed file extensions (e.g., "*.xml").
      * @return The content of the selected file as a string, or {@code null} if an error occurs or no file is selected.
      */
-    public static String loadFile(String extensionName, String extension) {
+    public static String loadFile(String extensionName, String... extensions) {
         FileChooser fileChooser = new FileChooser();
-        if (extensionName != null && extension != null)
-            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(extensionName, extension));
+        if (extensionName != null && extensions != null)
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(extensionName, extensions));
 
         File file = fileChooser.showOpenDialog(null);
-        if (file == null)
-            return null;
+        if (file == null) return null;
 
         try {
             return Files.readString(file.toPath());
@@ -49,8 +48,7 @@ public class FileHandler {
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(extensionName, extension));
 
         File file = fileChooser.showSaveDialog(null);
-        if (file == null)
-            return;
+        if (file == null) return;
 
         try {
             Files.write(file.toPath(), content.toString().getBytes());
