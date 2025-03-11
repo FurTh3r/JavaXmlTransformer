@@ -2,94 +2,190 @@ package com.jataxmltransformer.middleware;
 
 import com.jataxmltransformer.logic.cducecompiler.CDuceCodeLoader;
 import com.jataxmltransformer.logic.cducecompiler.CDuceCommandExecutor;
-import com.jataxmltransformer.logic.data.EditedElement;
 import com.jataxmltransformer.logic.data.Ontology;
-import com.jataxmltransformer.logic.xml.XMLDiffChecker;
-
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Middleware class that acts as an intermediary for ontology processing.
+ * It maintains a global state and facilitates interactions between various components.
+ */
 public class Middleware {
-    public static void setup() {
-        // Load structure
+    private static Middleware instance;
+    private static List<String> namespaces;
+    private static List<String> structure;
+    private static List<String> classes;
+    private static List<String> attributes;
+    private static Ontology ontology;
 
-        List<String> namespaces = List.of(
-                "namespace www = \"http://www.persone#\";;"
-        );
-
-        List<String> structure = List.of(
-                "type Ontology = <rdf:RDF xml:base=String> [ Class* ]",
-                "type Class = <owl:Class rdf:about=String> [ ClassAtt* ]",
-                "type ClassAtt = SubClass | EqClass | Label | Note",
-                "type SubClass = <rdfs:subClassOf rdf:resource=String> []",
-                "type EqClass  = <owl:equivalentClass> [ EqAttr ] \n" +
-                        "              | <owl:equivalentClass rdf:resource=String> []",
-                "type EqAttr   = <owl:Restriction> [ AnyXml* ]",
-                "type Label    = <rdfs:label xml:lang=String> String",
-                "type Note     = <skos:scopeNote xml:lang=String> String"
-        );
-
-        List<String> attributes = List.of(
-                "SubClass",
-                "EqClass",
-                "Label",
-                "Note"
-        );
-
-        List<String> classes = List.of(
-                "<owl:Class rdf:about=cls>"
-        );
-
-        CDuceCodeLoader.loadCheckStructure(namespaces, structure, attributes, classes);
+    /**
+     * Private constructor to enforce singleton pattern.
+     */
+    private Middleware() {
+        namespaces = new ArrayList<>();
+        structure = new ArrayList<>();
+        classes = new ArrayList<>();
+        attributes = new ArrayList<>();
+        ontology = new Ontology();
     }
 
-    public static void main(String[] args) throws Exception {
-        setup();
+    /**
+     * Returns the singleton instance of Middleware.
+     * If the instance does not exist, it is created.
+     *
+     * @return Middleware instance
+     */
+    public static Middleware getInstance() {
+        if (instance == null) {
+            instance = new Middleware();
+        }
+        return instance;
+    }
+
+    /**
+     * Resets the singleton instance, allowing a new instance to be created.
+     */
+    public static void resetInstance() {
+        instance = null;
+    }
+
+    /**
+     * Gets the current ontology.
+     *
+     * @return the ontology
+     */
+    public Ontology getOntology() {
+        return ontology;
+    }
+
+    /**
+     * Sets the ontology.
+     *
+     * @param ontology the ontology to set
+     */
+    public void setOntology(Ontology ontology) {
+        Middleware.ontology = ontology;
+    }
+
+    /**
+     * Gets the list of namespaces.
+     *
+     * @return list of namespaces
+     */
+    public List<String> getNamespaces() {
+        return namespaces;
+    }
+
+    /**
+     * Sets the list of namespaces.
+     *
+     * @param namespaces list of namespaces
+     */
+    public void setNamespaces(List<String> namespaces) {
+        Middleware.namespaces = namespaces;
+    }
+
+    /**
+     * Gets the structure list.
+     *
+     * @return structure list
+     */
+    public List<String> getStructure() {
+        return structure;
+    }
+
+    /**
+     * Sets the structure list.
+     *
+     * @param structure structure list to set
+     */
+    public void setStructure(List<String> structure) {
+        Middleware.structure = structure;
+    }
+
+    /**
+     * Gets the list of classes.
+     *
+     * @return list of classes
+     */
+    public List<String> getClasses() {
+        return classes;
+    }
+
+    /**
+     * Sets the list of classes.
+     *
+     * @param classes list of classes
+     */
+    public void setClasses(List<String> classes) {
+        Middleware.classes = classes;
+    }
+
+    /**
+     * Gets the list of attributes.
+     *
+     * @return list of attributes
+     */
+    public List<String> getAttributes() {
+        return attributes;
+    }
+
+    /**
+     * Sets the list of attributes.
+     *
+     * @param attributes list of attributes
+     */
+    public void setAttributes(List<String> attributes) {
+        Middleware.attributes = attributes;
+    }
+
+    /**
+     * Sets namespaces, structure, classes, and attributes simultaneously.
+     *
+     * @param namespaces list of namespaces
+     * @param structure list of structure elements
+     * @param classes list of classes
+     * @param attributes list of attributes
+     */
+    public void setNamespacesAndStructure(List<String> namespaces, List<String> structure,
+                                          List<String> classes, List<String> attributes) {
+        Middleware.namespaces = namespaces;
+        Middleware.structure = structure;
+        Middleware.classes = classes;
+        Middleware.attributes = attributes;
+    }
+
+    /**
+     * Loads the ontology structure into the system using CDuce.
+     *
+     * @return true if the structure is successfully loaded, false otherwise
+     */
+    public boolean loadStructure() {
+        if (structure.isEmpty() || attributes.isEmpty() || classes.isEmpty()) return false;
+        CDuceCodeLoader.loadCheckStructure(namespaces, structure, attributes, classes);
+        return true;
+    }
+
+    /**
+     * Verifies the ontology using the CDuce command executor.
+     *
+     * @return true if verification is successful, false otherwise
+     * @throws Exception if an error occurs during verification
+     */
+    public boolean verifyOntology() throws Exception {
         CDuceCommandExecutor executor = new CDuceCommandExecutor();
-        Ontology ontology = new Ontology();
-        ontology.setOntologyName("try");
-        ontology.setOntologyExtension(".rdf"); // TODO Test syntax error?????????????????????????????????????????????????
-        ontology.setXmlData("<?xml version=\"1.0\"?>\n" +
-                "<rdf:RDF xmlns=\"http://www.persone/\"\n" +
-                "         xml:base=\"http://www.persone/\"\n" +
-                "         xmlns:owl=\"http://www.w3.org/2002/07/owl#\"\n" +
-                "         xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n" +
-                "         xmlns:rdfs=\"http://www.w3.org/2000/01/rdf-schema#\"\n" +
-                "         xmlns:skos=\"http://www.w3.org/2004/02/skos/core#\">\n" +
-                "\n" +
-                "  <!-- Classe Persona -->\n" +
-                "  <owl:Class rdf:about=\"http://www.persone#Persona\">\n" +
-                "    <rdfs:subClassOf rdf:resource=\"http://www.persone#Individuo\"/>\n" +
-                "    <rdfs:label xml:lang=\"en\">Person</rdfs:label>\n" +
-                "    <skos:scopeNote xml:lang=\"en\">This class represents a person</skos:scopeNote>\n" +
-                "    <!-- Classe Individuo -->\n" +
-                "    <owl:Class rdf:about=\"http://www.persone#Individuo\">\n" +
-                "      <rdfs:label xml:lang=\"it\">Individuo</rdfs:label>\n" +
-                "      <skos:scopeNote xml:lang=\"it\">Questa classe rappresenta un individuo</skos:scopeNote>\n" +
-                "    </owl:Class>\n" +
-                "  </owl:Class>\n" +
-                "\n" +
-                "  <!-- Classe Individuo -->\n" +
-                "  <owl:Class rdf:about=\"http://www.persone#Individuo\">\n" +
-                "    <rdfs:label xml:lang=\"it\">Individuo</rdfs:label>\n" +
-                "    <skos:scopeNote xml:lang=\"it\">Questa classe rappresenta un individuo</skos:scopeNote>\n" +
-                "  </owl:Class>\n" +
-                "\n" +
-                "</rdf:RDF>");
+        if (ontology.isEmpty()) return false;
         executor.verifyOntology(ontology);
-        executor.transformOntology(ontology);
+        return true;
+    }
 
-
-
-        // TEST DIFF XML
-
-        // TODO edit middleware to adapt to the new form of xml
- /*
-        XMLDiffChecker checker = new XMLDiffChecker();
-        List<EditedElement> edit =
-                checker.diff("C:\\Users\\loryp\\Documents\\University\\Lezioni\\2024-2025\\Tesi\\JavaXmlTransformer\\XmlTransformer\\src\\main\\resources\\io\\ontology.xml",
-                        "C:\\Users\\loryp\\Documents\\University\\Lezioni\\2024-2025\\Tesi\\JavaXmlTransformer\\XmlTransformer\\src\\main\\resources\\io\\ontology_output.xml");
-
-*/
+    /**
+     * Transforms the ontology. (Implementation pending)
+     *
+     * @return false (until implemented)
+     */
+    public boolean transformOntology() {
+        // Implement transformation logic here TODO
+        return false;
     }
 }

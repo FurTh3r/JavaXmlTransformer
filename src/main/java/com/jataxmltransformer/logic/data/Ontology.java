@@ -102,8 +102,7 @@ public class Ontology {
      * @throws IOException If an error occurs during file writing.
      */
     public void saveXmlToFile(String filePath) throws IOException {
-        if (xmlData == null || xmlData.isEmpty())
-            throw new IOException("XML data is empty or not set.");
+        if (xmlData == null || xmlData.isEmpty()) throw new IOException("XML data is empty or not set.");
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
             writer.write(xmlData);
@@ -124,8 +123,7 @@ public class Ontology {
 
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
-            while ((line = reader.readLine()) != null)
-                xmlBuilder.append(line).append("\n");
+            while ((line = reader.readLine()) != null) xmlBuilder.append(line).append("\n");
         } catch (FileNotFoundException e) {
             throw new IOException("File not found: " + filePath, e);
         } catch (IOException e) {
@@ -133,5 +131,14 @@ public class Ontology {
         }
 
         this.xmlData = xmlBuilder.toString();
+    }
+
+    /**
+     * Tells if the Ontology is empty or not
+     *
+     * @return true if empty, false otherwise
+     */
+    public boolean isEmpty() {
+        return xmlData == null || xmlData.isEmpty() || ontologyName == null || ontologyExtension == null;
     }
 }
