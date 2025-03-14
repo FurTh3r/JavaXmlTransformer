@@ -2,8 +2,15 @@ package com.jataxmltransformer.middleware;
 
 import com.jataxmltransformer.logic.cducecompiler.CDuceCodeLoader;
 import com.jataxmltransformer.logic.cducecompiler.CDuceCommandExecutor;
+import com.jataxmltransformer.logic.data.CheckStructure;
+import com.jataxmltransformer.logic.data.EditedElement;
+import com.jataxmltransformer.logic.data.ErrorInfo;
 import com.jataxmltransformer.logic.data.Ontology;
+import com.jataxmltransformer.logic.xml.XMLDiffChecker;
+import com.jataxmltransformer.logs.AppLogger;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -12,21 +19,16 @@ import java.util.List;
  */
 public class Middleware {
     private static Middleware instance;
-    private static List<String> namespaces;
-    private static List<String> structure;
-    private static List<String> classes;
-    private static List<String> attributes;
-    private static Ontology ontology;
+    private static CheckStructure checkStructure;
+    private static Ontology ontologyInput;
+    private static Ontology ontologyOutput;
 
     /**
      * Private constructor to enforce singleton pattern.
      */
     private Middleware() {
-        namespaces = new ArrayList<>();
-        structure = new ArrayList<>();
-        classes = new ArrayList<>();
-        attributes = new ArrayList<>();
-        ontology = new Ontology();
+        checkStructure = new CheckStructure();
+        ontologyInput = new Ontology();
     }
 
     /**
@@ -49,13 +51,21 @@ public class Middleware {
         instance = null;
     }
 
+    public Ontology getOntologyOutput() {
+        return ontologyOutput;
+    }
+
+    public void setOntologyOutput(Ontology ontologyOutput) {
+        Middleware.ontologyOutput = ontologyOutput;
+    }
+
     /**
      * Gets the current ontology.
      *
      * @return the ontology
      */
-    public Ontology getOntology() {
-        return ontology;
+    public Ontology getOntologyInput() {
+        return ontologyInput;
     }
 
     /**
@@ -63,8 +73,8 @@ public class Middleware {
      *
      * @param ontology the ontology to set
      */
-    public void setOntology(Ontology ontology) {
-        Middleware.ontology = ontology;
+    public void setOntologyInput(Ontology ontology) {
+        Middleware.ontologyInput = ontology;
     }
 
     /**
@@ -73,7 +83,7 @@ public class Middleware {
      * @return list of namespaces
      */
     public List<String> getNamespaces() {
-        return namespaces;
+        return checkStructure.getNamespaces();
     }
 
     /**
@@ -82,7 +92,7 @@ public class Middleware {
      * @param namespaces list of namespaces
      */
     public void setNamespaces(List<String> namespaces) {
-        Middleware.namespaces = namespaces;
+        checkStructure.setNamespaces(namespaces);
     }
 
     /**
@@ -91,7 +101,7 @@ public class Middleware {
      * @return structure list
      */
     public List<String> getStructure() {
-        return structure;
+        return checkStructure.getStructure();
     }
 
     /**
@@ -100,7 +110,7 @@ public class Middleware {
      * @param structure structure list to set
      */
     public void setStructure(List<String> structure) {
-        Middleware.structure = structure;
+        checkStructure.setStructure(structure);
     }
 
     /**
@@ -109,7 +119,7 @@ public class Middleware {
      * @return list of classes
      */
     public List<String> getClasses() {
-        return classes;
+        return checkStructure.getClasses();
     }
 
     /**
@@ -118,7 +128,7 @@ public class Middleware {
      * @param classes list of classes
      */
     public void setClasses(List<String> classes) {
-        Middleware.classes = classes;
+        checkStructure.setClasses(classes);
     }
 
     /**
@@ -127,7 +137,7 @@ public class Middleware {
      * @return list of attributes
      */
     public List<String> getAttributes() {
-        return attributes;
+        return checkStructure.getAttributes();
     }
 
     /**
@@ -136,23 +146,22 @@ public class Middleware {
      * @param attributes list of attributes
      */
     public void setAttributes(List<String> attributes) {
-        Middleware.attributes = attributes;
+        checkStructure.setAttributes(attributes);
     }
 
     /**
      * Sets namespaces, structure, classes, and attributes simultaneously.
      *
      * @param namespaces list of namespaces
-     * @param structure list of structure elements
-     * @param classes list of classes
+     * @param structure  list of structure elements
+     * @param classes    list of classes
      * @param attributes list of attributes
      */
-    public void setNamespacesAndStructure(List<String> namespaces, List<String> structure,
-                                          List<String> classes, List<String> attributes) {
-        Middleware.namespaces = namespaces;
-        Middleware.structure = structure;
-        Middleware.classes = classes;
-        Middleware.attributes = attributes;
+    public void setNamespacesAndStructure(List<String> namespaces, List<String> structure, List<String> classes, List<String> attributes) {
+        checkStructure.setNamespaces(namespaces);
+        checkStructure.setStructure(structure);
+        checkStructure.setClasses(classes);
+        checkStructure.setAttributes(attributes);
     }
 
     /**
@@ -161,8 +170,11 @@ public class Middleware {
      * @return true if the structure is successfully loaded, false otherwise
      */
     public boolean loadStructure() {
-        if (structure.isEmpty() || attributes.isEmpty() || classes.isEmpty()) return false;
-        CDuceCodeLoader.loadCheckStructure(namespaces, structure, attributes, classes);
+        if (checkStructure.getStructure().isEmpty() || checkStructure.getAttributes().isEmpty() || checkStructure.getClasses().isEmpty()) {
+            AppLogger.severe("Middleware: loadStructure: structure or classes or attributes is empty");
+            return false;
+        }
+        CDuceCodeLoader.loadCheckStructure(checkStructure.getNamespaces(), checkStructure.getStructure(), checkStructure.getAttributes(), checkStructure.getClasses());
         return true;
     }
 
@@ -174,18 +186,41 @@ public class Middleware {
      */
     public boolean verifyOntology() throws Exception {
         CDuceCommandExecutor executor = new CDuceCommandExecutor();
-        if (ontology.isEmpty()) return false;
-        executor.verifyOntology(ontology);
-        return true;
+        if (ontologyInput.isEmpty()) {
+            AppLogger.severe("Middleware: verifyOntology: ontology is empty");
+            return false;
+        }
+        return executor.verifyOntology(ontologyInput);
     }
 
     /**
-     * Transforms the ontology. (Implementation pending)
-     *
-     * @return false (until implemented)
+     * Transforms the ontology.
      */
-    public boolean transformOntology() {
-        // Implement transformation logic here TODO
-        return false;
+    public void transformOntology() throws Exception {
+        CDuceCommandExecutor executor = new CDuceCommandExecutor();
+        ontologyOutput = executor.transformOntology(ontologyInput);
+    }
+
+    public List<ErrorInfo> getErrors() throws Exception {
+        if (ontologyOutput == null || ontologyInput == null || ontologyOutput.isEmpty() || ontologyInput.isEmpty())
+            return Collections.emptyList();
+
+        XMLDiffChecker xmlDiffChecker = new XMLDiffChecker();
+        List<EditedElement> differences = xmlDiffChecker.diff(ontologyInput.getXmlData(), ontologyOutput.getXmlData());
+
+        List<ErrorInfo> errorList = new ArrayList<>();
+
+        for (EditedElement diff : differences) {
+            int startLine = diff.getStartLine();
+            int endLine = diff.getEndLine();
+            String errorMessage = "Difference between the two files.";
+            String elementDetails = diff.getId();
+
+            if (startLine != -1 && endLine != -1) {
+                errorList.add(new ErrorInfo(startLine, endLine, errorMessage, elementDetails));
+            }
+        }
+
+        return errorList;
     }
 }
