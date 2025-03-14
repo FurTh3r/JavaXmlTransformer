@@ -2,18 +2,13 @@ package com.jataxmltransformer.logic.xml;
 
 import com.jataxmltransformer.logic.data.EditedElement;
 import com.jataxmltransformer.logs.AppLogger;
+import org.xmlunit.XMLUnitException;
 import org.xmlunit.builder.DiffBuilder;
 import org.xmlunit.diff.*;
 
 import javax.xml.transform.stream.StreamSource;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.io.*;
+import java.util.*;
 
 /**
  * The {@code XMLDiffChecker} class compares two XML files using XMLUnit and identifies the differences.
@@ -31,6 +26,11 @@ public class XMLDiffChecker implements DiffChecker {
         EditedElement editedElement = new EditedElement();
 
         Comparison comparison = difference.getComparison();
+        if (comparison == null || comparison.getControlDetails() == null || comparison.getTestDetails() == null) {
+            AppLogger.severe("Comparison or control/test details are null.");
+            return editedElement;
+        }
+
         Object controlValue = comparison.getControlDetails().getValue();
         Object testValue = comparison.getTestDetails().getValue();
 
@@ -39,16 +39,18 @@ public class XMLDiffChecker implements DiffChecker {
 
         editedElement.setData(testNodeValue);
 
-        // Add context to the message
-        String context = "Class: " + getParentNodeName(comparison.getControlDetails().getTarget()) + ", Property: "
-                + getNodeName(comparison.getControlDetails().getTarget());
+        String context = "Class: " + getParentNodeName(comparison.getControlDetails().getTarget()) +
+                ", Property: " + getNodeName(comparison.getControlDetails().getTarget());
         editedElement.setId("Control: " + controlNodeValue + " => Test: " + testNodeValue + " | Context: " + context);
 
         try {
-            int lineNumber = determineLineNumber(inputXMLPath, controlNodeValue, testNodeValue);
-            editedElement.setLine(lineNumber);
+            int startLine = determineLineNumber(inputXMLPath, controlNodeValue, testNodeValue);
+            int endLine = (controlNodeValue.contains("\n") || testNodeValue.contains("\n")) ?
+                    findEndLine(inputXMLPath, startLine, controlNodeValue, testNodeValue) : startLine;
+            editedElement.setStartLine(startLine);
+            editedElement.setEndLine(endLine);
         } catch (IOException e) {
-            AppLogger.severe("Error determining line number: " + e.getMessage());
+            AppLogger.severe("Error determining line numbers: " + e.getMessage());
         }
 
         return editedElement;
@@ -63,9 +65,7 @@ public class XMLDiffChecker implements DiffChecker {
     private static String getParentNodeName(Object node) {
         if (node instanceof org.w3c.dom.Node) {
             org.w3c.dom.Node parent = ((org.w3c.dom.Node) node).getParentNode();
-            if (parent != null) {
-                return parent.getNodeName();
-            }
+            return (parent != null) ? parent.getNodeName() : "Unknown";
         }
         return "Unknown";
     }
@@ -77,10 +77,7 @@ public class XMLDiffChecker implements DiffChecker {
      * @return The name of the node, or "Unknown" if not found.
      */
     private static String getNodeName(Object node) {
-        if (node instanceof org.w3c.dom.Node) {
-            return ((org.w3c.dom.Node) node).getNodeName();
-        }
-        return "Unknown";
+        return (node instanceof org.w3c.dom.Node) ? ((org.w3c.dom.Node) node).getNodeName() : "Unknown";
     }
 
     /**
@@ -92,23 +89,42 @@ public class XMLDiffChecker implements DiffChecker {
      * @return The line number where the difference occurs, or -1 if not found.
      * @throws IOException If an error occurs while reading the file.
      */
-    private static int determineLineNumber(String xmlFilePath, String controlValue, String testValue)
-            throws IOException {
+    private static int determineLineNumber(String xmlFilePath, String controlValue, String testValue) throws IOException {
         int lineNumber = -1;
         int currentLine = 0;
-
-        File file = new File(xmlFilePath);
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(xmlFilePath))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 currentLine++;
-                if (line.contains(controlValue) || line.contains(testValue)) {
-                    lineNumber = currentLine;
-                    break;
-                }
+                if (line.contains(controlValue) || line.contains(testValue))
+                    return currentLine;
             }
         }
         return lineNumber;
+    }
+
+    /**
+     * Finds the ending line number of a multi-line difference in the XML file.
+     *
+     * @param xmlFilePath  The path to the XML file.
+     * @param startLine    The starting line of the difference.
+     * @param controlValue The expected value.
+     * @param testValue    The actual value found in the test XML.
+     * @return The ending line number of the difference.
+     * @throws IOException If an error occurs while reading the file.
+     */
+    private static int findEndLine(String xmlFilePath, int startLine, String controlValue, String testValue) throws IOException {
+        int endLine = startLine;
+        try (BufferedReader reader = new BufferedReader(new FileReader(xmlFilePath))) {
+            int currentLine = 0;
+            String line;
+            while ((line = reader.readLine()) != null) {
+                currentLine++;
+                if (currentLine >= startLine && (line.contains(controlValue) || line.contains(testValue)))
+                    endLine = currentLine;
+            }
+        }
+        return endLine;
     }
 
     /**
@@ -117,37 +133,39 @@ public class XMLDiffChecker implements DiffChecker {
      * @param inputXMLPath  The path to the original XML file.
      * @param outputXMLPath The path to the modified XML file.
      * @return A list of {@link EditedElement} objects representing the differences found.
+     * @throws IOException If an error occurs while accessing the XML files.
      */
     @Override
-    public List<EditedElement> diff(String inputXMLPath, String outputXMLPath) {
+    public List<EditedElement> diff(String inputXMLPath, String outputXMLPath) throws IOException {
         List<EditedElement> differences = new ArrayList<>();
-        Set<String> seenDifferences = new HashSet<>(); // To avoid duplicates
+        Set<String> seenDifferences = new HashSet<>();
 
-        StreamSource input = new StreamSource(new File(inputXMLPath));
-        StreamSource output = new StreamSource(new File(outputXMLPath));
+        File inputXML = new File(inputXMLPath);
+        File outputXML = new File(outputXMLPath);
 
-        Diff diff = DiffBuilder
-                .compare(input)
-                .withTest(output)
-                .normalizeWhitespace()
-                .ignoreWhitespace()
-                .ignoreComments()
-                .ignoreElementContentWhitespace()
-                .withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndText))
-                .checkForSimilar()
-                .build();
+        if (!inputXML.exists() || !outputXML.exists())
+            throw new IOException("One or both XML files do not exist.");
+
+        Diff diff;
+        try {
+            diff = DiffBuilder.compare(new StreamSource(inputXML))
+                    .withTest(new StreamSource(outputXML))
+                    .normalizeWhitespace()
+                    .ignoreWhitespace()
+                    .ignoreComments()
+                    .ignoreElementContentWhitespace()
+                    .withNodeMatcher(new DefaultNodeMatcher(ElementSelectors.byNameAndText))
+                    .checkForSimilar()
+                    .build();
+        } catch (XMLUnitException e) {
+            AppLogger.severe(e.getMessage());
+            return null;
+        }
 
         for (Difference difference : diff.getDifferences()) {
             EditedElement editedElement = getEditedElement(inputXMLPath, difference);
-
-            if (seenDifferences.add(editedElement.getId())) { // Avoid duplicates
+            if (seenDifferences.add(editedElement.getId()))
                 differences.add(editedElement);
-                AppLogger.info("Found difference at " + difference.getComparison().getControlDetails().getXPath()
-                        + " | Expected: " + difference.getComparison().getControlDetails().getValue()
-                        + " | Found: " + difference.getComparison().getTestDetails().getValue()
-                        + " | Control Node: " + difference.getComparison().getControlDetails().getTarget()
-                        + " | Test Node: " + difference.getComparison().getTestDetails().getTarget());
-            }
         }
         return differences;
     }
