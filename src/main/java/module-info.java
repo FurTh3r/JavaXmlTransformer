@@ -8,5 +8,11 @@ module XmlTransformer {
     requires org.xmlunit;
     requires java.xml;
 
+    exports com.jataxmltransformer.middleware;
+    exports com.jataxmltransformer.logic.cducecompiler;
+    exports com.jataxmltransformer.logic.data;
+    exports com.jataxmltransformer.logic.xml;
+    exports com.jataxmltransformer.logs;
+    opens com.jataxmltransformer.logic.cducecompiler;
     opens com.jataxmltransformer.GUI;
 }
