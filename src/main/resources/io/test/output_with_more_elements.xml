@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <person>
+        <name>John Doe</name>
+        <age>30</age>
+    </person>
+    <person>
+        <name>Jane Doe</name>
+        <age>28</age>
+    </person>
+    <person>
+        <name>Bob Smith</name>
+        <age>35</age>
+    </person>
+</root>

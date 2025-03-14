@@ -4,9 +4,46 @@ package com.jataxmltransformer.logic.data;
  * Represents an edited element in an XML file, containing information about the difference found.
  */
 public class EditedElement {
-    private String id;   // Identifier for the edited element
-    private String data; // Modified data value
-    private int line;    // Line number where the modification occurred
+    private String data;
+    private String id;
+    private int startLine;
+    private int endLine;
+
+    /**
+     * Gets the starting line number of the edited element.
+     *
+     * @return The starting line number.
+     */
+    public int getStartLine() {
+        return startLine;
+    }
+
+    /**
+     * Sets the starting line number of the edited element.
+     *
+     * @param startLine The starting line number to set.
+     */
+    public void setStartLine(int startLine) {
+        this.startLine = startLine;
+    }
+
+    /**
+     * Gets the ending line number of the edited element.
+     *
+     * @return The ending line number.
+     */
+    public int getEndLine() {
+        return endLine;
+    }
+
+    /**
+     * Sets the ending line number of the edited element.
+     *
+     * @param endLine The ending line number to set.
+     */
+    public void setEndLine(int endLine) {
+        this.endLine = endLine;
+    }
 
     /**
      * Gets the identifier of the edited element.
@@ -45,37 +82,15 @@ public class EditedElement {
     }
 
     /**
-     * Gets the line number where the modification occurred.
-     *
-     * @return The line number of the modification.
-     */
-    public int getLine() {
-        return line;
-    }
-
-    /**
-     * Sets the line number where the modification occurred.
-     *
-     * @param line The line number to set.
-     */
-    public void setLine(int line) {
-        this.line = line;
-    }
-
-    /**
      * Returns a string representation of the EditedElement.
      *
-     * @return A string containing the id, data, and line number of the element.
+     * @return A string containing the id, data, and line numbers of the element.
      */
     @Override
     public String toString() {
-        return "EditedElement{"
-                + "id='"
-                + id + '\''
-                + ", data='"
-                + data + '\''
-                + ", line="
-                + line
-                + '}';
+        return "EditedElement{" + "id='" + id + '\''
+                + ", data='" + data + '\''
+                + ", lineBegin=" + startLine + "\'"
+                + ", lineEnd=" + endLine + '}';
     }
 }

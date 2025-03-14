@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <person>
+        <name>John Doe</name>
+        <age>31</age>  <!-- Age changed from 30 to 31 -->
+    </person>
+    <person>
+        <name>Jane Doe</name>
+        <age>28</age>
+    </person>
+    <person>
+        <name>Bob Smith</name>  <!-- New person added -->
+        <age>35</age>
+    </person>
+</root>

@@ -2,6 +2,7 @@ package com.jataxmltransformer.logic.xml;
 
 import com.jataxmltransformer.logic.data.EditedElement;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -19,5 +20,5 @@ public interface DiffChecker {
      * @param outputXMLPath The path to the output XML file (test file).
      * @return A list of {@code EditedElement} objects representing the differences.
      */
-    List<EditedElement> diff(String inputXMLPath, String outputXMLPath);
+    List<EditedElement> diff(String inputXMLPath, String outputXMLPath) throws IOException;
 }
