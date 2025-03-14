@@ -18,10 +18,20 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Unit tests for the CDuceCommandExecutor class.
+ * These tests verify the functionality of the CDuceCommandExecutor
+ * in transforming and verifying ontologies.
+ */
 public class CDuceCommandExecutorTests {
     private static Ontology input;
     CDuceCommandExecutor commandExecutor = new CDuceCommandExecutor();
 
+    /**
+     * Initializes the default structure for ontology testing.
+     * This setup loads the necessary namespaces and structure
+     * for ontology verification.
+     */
     @BeforeAll
     static void setUp() {
         // Initializing default structure for testing
@@ -46,6 +56,13 @@ public class CDuceCommandExecutorTests {
         input.setOntologyName(".xml");
     }
 
+    /**
+     * Verifies that an ontology is correct based on its XML structure.
+     * This test ensures the ontology is well-formed and follows the
+     * specified structure for ontology classes and attributes.
+     *
+     * @throws Exception If there is an error during the verification.
+     */
     @Test
     void verifyOntologyCorrect() throws Exception {
         // Verifying a correct ontology
@@ -68,6 +85,13 @@ public class CDuceCommandExecutorTests {
         assertTrue(commandExecutor.verifyOntology(input));
     }
 
+    /**
+     * Verifies that an ontology with a syntax error is correctly detected.
+     * This test checks if the ontology has any malformed XML tags or missing
+     * closing tags.
+     *
+     * @throws Exception If there is an error during the verification.
+     */
     @Test
     void verifyOntologySyntaxError() throws Exception {
         // Verifying an ontology with a syntax error
@@ -90,6 +114,13 @@ public class CDuceCommandExecutorTests {
         assertFalse(commandExecutor.verifyOntology(input));
     }
 
+    /**
+     * Verifies an ontology that contains a semantic error.
+     * This test ensures that the ontology follows the expected semantic rules,
+     * such as proper placement of labels within classes.
+     *
+     * @throws Exception If there is an error during the verification.
+     */
     @Test
     void verifyOntologySemanticError1() throws Exception {
         // Verifying an ontology with a semantic error
@@ -116,6 +147,13 @@ public class CDuceCommandExecutorTests {
         assertFalse(commandExecutor.verifyOntology(input));
     }
 
+    /**
+     * Verifies an ontology that contains a semantic error.
+     * This test ensures that the ontology follows the expected semantic rules,
+     * such as proper placement of labels within classes.
+     *
+     * @throws Exception If there is an error during the verification.
+     */
     @Test
     void verifyOntologySemanticError2() throws Exception {
         // Verifying an ontology with a semantic error
@@ -139,6 +177,11 @@ public class CDuceCommandExecutorTests {
         assertFalse(commandExecutor.verifyOntology(input));
     }
 
+    /**
+     * Verifies an ontology that is already correct.
+     *
+     * @throws Exception If there is an error during the verification.
+     */
     @Test
     void transformOntologyCorrect() throws Exception {
         // Loading ontology
@@ -164,6 +207,13 @@ public class CDuceCommandExecutorTests {
         assertEquals(formatXMLFromString(output.getXmlData()), formatXMLFromString(expected.getXmlData()));
     }
 
+    /**
+     * Verifies an ontology that contains a semantic error.
+     * This test ensures that the ontology follows the expected semantic rules,
+     * such as proper placement of labels within classes.
+     *
+     * @throws Exception If there is an error during the verification.
+     */
     @Test
     void transformOntologyError1() throws Exception {
         // Loading ontology
@@ -192,6 +242,13 @@ public class CDuceCommandExecutorTests {
         assertEquals(formatXMLFromString(output.getXmlData()), formatXMLFromString(expected.getXmlData()));
     }
 
+    /**
+     * Verifies an ontology that contains a semantic error.
+     * This test ensures that the ontology follows the expected semantic rules,
+     * such as proper placement of labels within classes.
+     *
+     * @throws Exception If there is an error during the verification.
+     */
     @Test
     void transformOntologyError2() throws Exception {
         // Loading ontology
@@ -217,6 +274,13 @@ public class CDuceCommandExecutorTests {
         assertEquals(formatXMLFromString(output.getXmlData()), formatXMLFromString(expected.getXmlData()));
     }
 
+    /**
+     * Verifies an ontology that contains a semantic error.
+     * This test ensures that the ontology follows the expected semantic rules,
+     * such as proper placement of labels within classes.
+     *
+     * @throws Exception If there is an error during the verification.
+     */
     @Test
     void transformOntologyError3() throws Exception {
         // Loading ontology
@@ -246,6 +310,13 @@ public class CDuceCommandExecutorTests {
         assertEquals(formatXMLFromString(output.getXmlData()), formatXMLFromString(expected.getXmlData()));
     }
 
+    /**
+     * Verifies an ontology that contains a semantic error.
+     * This test ensures that the ontology follows the expected semantic rules,
+     * such as proper placement of labels within classes.
+     *
+     * @throws Exception If there is an error during the verification.
+     */
     @Test
     void transformOntologyError4() throws Exception {
         // Loading ontology
@@ -281,6 +352,11 @@ public class CDuceCommandExecutorTests {
         assertEquals(formatXMLFromString(output.getXmlData()), formatXMLFromString(expected.getXmlData()));
     }
 
+    /**
+     * This method returns the expected output used in the tests.
+     *
+     * @return the expected output.
+     */
     private static Ontology getExpected() {
         Ontology expected = new Ontology();
         expected.setXmlData("""
@@ -300,11 +376,11 @@ public class CDuceCommandExecutorTests {
     }
 
     /**
-     * Formats the XML data contained in a string and returns the formatted XML.
+     * Utility method to format XML data for comparison.
      *
-     * @param xmlData The XML data as a string.
-     * @return The formatted XML data as a string.
-     * @throws Exception If an error occurs during XML formatting.
+     * @param xmlData The XML data to format.
+     * @return The formatted XML string.
+     * @throws Exception If there is an error during formatting.
      */
     private String formatXMLFromString(String xmlData) throws Exception {
         if (xmlData == null || xmlData.isEmpty()) {

@@ -8,8 +8,13 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Test suite for the Middleware class.
+ * Verifies the functionality of the Middleware's ontology handling and transformation methods.
+ */
 class MiddlewareTests {
 
+    // XML data used for ontology testing
     private final String xmlDataCheck = """
             <?xml version="1.0" encoding="UTF-8"?>
             <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -24,11 +29,17 @@ class MiddlewareTests {
             </rdf:RDF>
             """;
 
+    /**
+     * Resets the Middleware instance before each test.
+     */
     @BeforeEach
     void setUp() {
         Middleware.resetInstance();
     }
 
+    /**
+     * Tests that the Middleware class correctly follows the Singleton pattern.
+     */
     @Test
     void testSingletonInstance() {
         Middleware instance1 = Middleware.getInstance();
@@ -36,6 +47,9 @@ class MiddlewareTests {
         assertSame(instance1, instance2, "Middleware should be a singleton instance");
     }
 
+    /**
+     * Tests setting and getting the ontology input in the Middleware.
+     */
     @Test
     void testSetAndGetOntologyInput() {
         Middleware middleware = Middleware.getInstance();
@@ -50,6 +64,9 @@ class MiddlewareTests {
         assertEquals("<Ontology></Ontology>", middleware.getOntologyInput().getXmlData());
     }
 
+    /**
+     * Tests loading the ontology structure in the Middleware.
+     */
     @Test
     void testLoadStructure() {
         Middleware middleware = Middleware.getInstance();
@@ -69,6 +86,9 @@ class MiddlewareTests {
         assertTrue(result, "Structure should load successfully");
     }
 
+    /**
+     * Tests that loading the structure fails when attributes and classes are empty.
+     */
     @Test
     void testLoadStructureFailsWhenEmpty() {
         Middleware middleware = Middleware.getInstance();
@@ -76,6 +96,9 @@ class MiddlewareTests {
         assertFalse(result, "Structure loading should fail when attributes and classes are empty");
     }
 
+    /**
+     * Tests verifying an empty ontology in the Middleware.
+     */
     @Test
     void testVerifyOntologyFailsWhenOntologyIsEmpty() throws Exception {
         Middleware middleware = Middleware.getInstance();
@@ -86,6 +109,9 @@ class MiddlewareTests {
         assertFalse(result, "Verification should fail for an empty ontology");
     }
 
+    /**
+     * Tests transforming an ontology and checking the output.
+     */
     @Test
     void testTransformOntology1() throws Exception {
         Middleware middleware = Middleware.getInstance();
@@ -103,6 +129,9 @@ class MiddlewareTests {
                 XMLFormatter.formatOntology(inputOntology).getXmlData());
     }
 
+    /**
+     * Tests transforming another version of the ontology and checking the output.
+     */
     @Test
     void testTransformOntology2() throws Exception {
         Middleware middleware = Middleware.getInstance();
@@ -133,6 +162,9 @@ class MiddlewareTests {
                 XMLFormatter.formatXMLFromString(xmlDataCheck));
     }
 
+    /**
+     * Tests transforming an ontology with nested elements.
+     */
     @Test
     void testTransformOntology3() throws Exception {
         Middleware middleware = Middleware.getInstance();
@@ -166,6 +198,9 @@ class MiddlewareTests {
                 XMLFormatter.formatXMLFromString(xmlDataCheck));
     }
 
+    /**
+     * Tests transforming an ontology with multiple nested classes.
+     */
     @Test
     void testTransformOntology4() throws Exception {
         Middleware middleware = Middleware.getInstance();

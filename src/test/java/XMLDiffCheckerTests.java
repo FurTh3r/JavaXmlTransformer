@@ -8,16 +8,26 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Unit tests for the {@link XMLDiffChecker} class to verify the functionality of the diff method.
+ */
 public class XMLDiffCheckerTests {
 
     private XMLDiffChecker xmlDiffChecker;
 
+    /**
+     * Setup method to initialize the XMLDiffChecker before each test.
+     */
     @BeforeEach
     public void setUp() {
         xmlDiffChecker = new XMLDiffChecker();
     }
 
-    // Test diff() when there are differences between two XML files
+    /**
+     * Test for the {@link XMLDiffChecker#diff(String, String)} method when there are differences between two XML files.
+     *
+     * @throws IOException If an I/O error occurs while reading the files.
+     */
     @Test
     public void testDiffWithDifferences() throws IOException {
         String inputXMLPath = "src/main/resources/io/test/input.xml";  // Path to test input XML file
@@ -31,7 +41,11 @@ public class XMLDiffCheckerTests {
         assertFalse(differences.isEmpty(), "There should be differences between the two XML files.");
     }
 
-    // Test diff() when there are no differences between two XML files
+    /**
+     * Test for the {@link XMLDiffChecker#diff(String, String)} method when there are no differences between two XML files.
+     *
+     * @throws IOException If an I/O error occurs while reading the files.
+     */
     @Test
     public void testDiffWithNoDifferences() throws IOException {
         String inputXMLPath = "src/main/resources/io/test/input.xml";  // Path to test input XML file
@@ -45,7 +59,9 @@ public class XMLDiffCheckerTests {
         assertEquals(0, differences.size(), "There should be no differences between the two XML files.");
     }
 
-    // Test diff() for invalid file paths
+    /**
+     * Test for the {@link XMLDiffChecker#diff(String, String)} method when provided with invalid file paths.
+     */
     @Test
     public void testDiffWithInvalidFilePaths() {
         String inputXMLPath = "src/main/resources/io/test/non_existent_input.xml";  // Invalid path
@@ -56,7 +72,11 @@ public class XMLDiffCheckerTests {
                 "An exception should be thrown when trying to compare non-existent files.");
     }
 
-    // Test diff() for files with identical content
+    /**
+     * Test for the {@link XMLDiffChecker#diff(String, String)} method when both files have identical content.
+     *
+     * @throws IOException If an I/O error occurs while reading the files.
+     */
     @Test
     public void testDiffIdenticalFiles() throws IOException {
         String inputXMLPath = "src/main/resources/io/test/input.xml";  // Path to test input XML file
@@ -70,7 +90,11 @@ public class XMLDiffCheckerTests {
         assertEquals(0, differences.size(), "There should be no differences between the two identical XML files.");
     }
 
-    // Test diff() when one file has more elements than the other
+    /**
+     * Test for the {@link XMLDiffChecker#diff(String, String)} method when one XML file has more elements than the other.
+     *
+     * @throws IOException If an I/O error occurs while reading the files.
+     */
     @Test
     public void testDiffWithMoreElementsInOneFile() throws IOException {
         String inputXMLPath = "src/main/resources/io/test/input.xml";  // Path to test input XML file
@@ -84,7 +108,11 @@ public class XMLDiffCheckerTests {
         assertFalse(differences.isEmpty(), "There should be differences when one file has more elements.");
     }
 
-    // Test diff() when one file has less content than the other
+    /**
+     * Test for the {@link XMLDiffChecker#diff(String, String)} method when one XML file has less content than the other.
+     *
+     * @throws IOException If an I/O error occurs while reading the files.
+     */
     @Test
     public void testDiffWithLessContentInOneFile() throws IOException {
         String inputXMLPath = "src/main/resources/io/test/input_with_more_content.xml";  // Path to input XML with more content
@@ -98,7 +126,11 @@ public class XMLDiffCheckerTests {
         assertFalse(differences.isEmpty(), "There should be differences when one file has less content.");
     }
 
-    // Test diff() for files with a missing root element
+    /**
+     * Test for the {@link XMLDiffChecker#diff(String, String)} method when one XML file is missing its root element.
+     *
+     * @throws IOException If an I/O error occurs while reading the files.
+     */
     @Test
     public void testDiffWithMissingRootElement() throws IOException {
         String inputXMLPath = "src/main/resources/io/test/input.xml";  // Path to test input XML file
