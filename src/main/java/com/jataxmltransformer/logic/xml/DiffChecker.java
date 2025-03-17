@@ -1,6 +1,7 @@
 package com.jataxmltransformer.logic.xml;
 
 import com.jataxmltransformer.logic.data.EditedElement;
+import com.jataxmltransformer.logic.data.Ontology;
 
 import java.io.IOException;
 import java.util.List;
@@ -20,5 +21,14 @@ public interface DiffChecker {
      * @param outputXMLPath The path to the output XML file (test file).
      * @return A list of {@code EditedElement} objects representing the differences.
      */
-    List<EditedElement> diff(String inputXMLPath, String outputXMLPath) throws IOException;
+    List<EditedElement> diffXmlFiles(String inputXMLPath, String outputXMLPath) throws IOException;
+
+    /**
+     * Compares two XML files and returns a list of differences.
+     *
+     * @param inputOntology  The input ontology data (control Ontology).
+     * @param outputOntology The output ontology data (test Ontology).
+     * @return A list of {@code EditedElement} objects representing the differences.
+     */
+    List<EditedElement> diffOntologies(Ontology inputOntology, Ontology outputOntology) throws Exception;
 }
