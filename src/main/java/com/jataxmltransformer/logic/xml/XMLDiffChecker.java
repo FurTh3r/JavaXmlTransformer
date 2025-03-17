@@ -65,9 +65,9 @@ public class XMLDiffChecker implements DiffChecker {
     /**
      * Compares two XML sources (files or strings) and identifies the differences.
      *
-     * @param inputSource   The source of the original (control) XML data.
-     * @param outputSource  The source of the modified (test) XML data.
-     * @param inputXMLPath  The path to the original XML file (if applicable). Used for line number determination.
+     * @param inputSource  The source of the original (control) XML data.
+     * @param outputSource The source of the modified (test) XML data.
+     * @param inputXMLPath The path to the original XML file (if applicable). Used for line number determination.
      * @return A list of {@link EditedElement} objects representing the differences found.
      * @throws Exception If an error occurs during the comparison (e.g., malformed XML).
      */
@@ -156,27 +156,26 @@ public class XMLDiffChecker implements DiffChecker {
             return editedElement;
         }
 
-        Object controlValue = comparison.getControlDetails().getValue();
-        Object testValue = comparison.getTestDetails().getValue();
+        // Determine which block of XML content (test or control) is being edited
+        String testBlock = comparison.getTestDetails().getValue() != null ? comparison.getTestDetails()
+                .getValue().toString() : "";
+        String controlBlock = comparison.getControlDetails().getValue() != null ? comparison.getControlDetails()
+                .getValue().toString() : "";
 
-        String controlNodeValue = (controlValue == null) ? "null" : controlValue.toString().trim();
-        String testNodeValue = (testValue == null) ? "null" : testValue.toString().trim();
+        // Set the edited element's data
+        editedElement.setData(testBlock); // Store the full test block data
 
-        editedElement.setData(testNodeValue);
+        String controlXPath = comparison.getControlDetails().getXPath();
+        String testXPath = comparison.getTestDetails().getXPath();
 
         String context = "Class: " + getParentNodeName(comparison.getControlDetails().getTarget()) +
                 ", Property: " + getNodeName(comparison.getControlDetails().getTarget());
-        editedElement.setId("Control: " + controlNodeValue + " => Test: " + testNodeValue + " | Context: " + context);
 
-        try {
-            int startLine = determineLineNumber(xmlContent, controlNodeValue, testNodeValue);
-            int endLine = (controlNodeValue.contains("\n") || testNodeValue.contains("\n")) ?
-                    findEndLine(xmlContent, startLine, controlNodeValue, testNodeValue) : startLine;
-            editedElement.setStartLine(startLine);
-            editedElement.setEndLine(endLine);
-        } catch (IOException e) {
-            AppLogger.severe("Error determining line numbers: " + e.getMessage());
-        }
+        // Setting the ID for the edited element, which is based on the XPaths
+        editedElement.setId("Control XPath: " + controlXPath + " => Test XPath: " + testXPath + " | Context: " + context);
+
+        // Set the XPath for the edited element
+        editedElement.setxPath(controlXPath);
 
         return editedElement;
     }
@@ -203,60 +202,5 @@ public class XMLDiffChecker implements DiffChecker {
      */
     private static String getNodeName(Object node) {
         return (node instanceof org.w3c.dom.Node) ? ((org.w3c.dom.Node) node).getNodeName() : "Unknown";
-    }
-
-    /**
-     * Determines the line number of a given value within an XML file.
-     *
-     * @param xmlContent  The content of the XML file as a {@link String}.
-     * @param controlValue The expected value.
-     * @param testValue    The actual value found in the test XML.
-     * @return The line number where the difference occurs, or -1 if not found.
-     * @throws IOException If an error occurs while reading the file.
-     */
-    private static int determineLineNumber(String xmlContent, String controlValue, String testValue)
-            throws IOException {
-        if (xmlContent == null)
-            throw new IllegalArgumentException("XML content cannot be null.");
-
-        int lineNumber = -1;
-        int currentLine = 0;
-        try (BufferedReader reader = new BufferedReader(new StringReader(xmlContent))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                currentLine++;
-                if (line.contains(controlValue) || line.contains(testValue))
-                    return currentLine;
-            }
-        }
-        return lineNumber;
-    }
-
-    /**
-     * Finds the ending line number of a multi-line difference in the XML file.
-     *
-     * @param xmlContent  The content of the XML file as a {@link String}.
-     * @param startLine   The starting line of the difference.
-     * @param controlValue The expected value.
-     * @param testValue    The actual value found in the test XML.
-     * @return The ending line number of the difference.
-     * @throws IOException If an error occurs while reading the file.
-     */
-    private static int findEndLine(String xmlContent, int startLine, String controlValue, String testValue)
-            throws IOException {
-        if (xmlContent == null)
-            throw new IllegalArgumentException("XML content cannot be null.");
-
-        int endLine = startLine;
-        try (BufferedReader reader = new BufferedReader(new StringReader(xmlContent))) {
-            int currentLine = 0;
-            String line;
-            while ((line = reader.readLine()) != null) {
-                currentLine++;
-                if (currentLine >= startLine && (line.contains(controlValue) || line.contains(testValue)))
-                    endLine = currentLine;
-            }
-        }
-        return endLine;
     }
 }

@@ -6,44 +6,7 @@ package com.jataxmltransformer.logic.data;
 public class EditedElement {
     private String data;
     private String id;
-    private int startLine;
-    private int endLine;
-
-    /**
-     * Gets the starting line number of the edited element.
-     *
-     * @return The starting line number.
-     */
-    public int getStartLine() {
-        return startLine;
-    }
-
-    /**
-     * Sets the starting line number of the edited element.
-     *
-     * @param startLine The starting line number to set.
-     */
-    public void setStartLine(int startLine) {
-        this.startLine = startLine;
-    }
-
-    /**
-     * Gets the ending line number of the edited element.
-     *
-     * @return The ending line number.
-     */
-    public int getEndLine() {
-        return endLine;
-    }
-
-    /**
-     * Sets the ending line number of the edited element.
-     *
-     * @param endLine The ending line number to set.
-     */
-    public void setEndLine(int endLine) {
-        this.endLine = endLine;
-    }
+    private String xPath;
 
     /**
      * Gets the identifier of the edited element.
@@ -82,15 +45,34 @@ public class EditedElement {
     }
 
     /**
+     * Gets the XPath expression of the edited element.
+     *
+     * @return The XPath expression of the edited element.
+     */
+    public String getxPath() {
+        return xPath;
+    }
+
+    /**
+     * Sets the XPath expression of the edited element.
+     *
+     * @param xPath The XPath expression to set.
+     */
+    public void setxPath(String xPath) {
+        this.xPath = xPath;
+    }
+
+    /**
      * Returns a string representation of the EditedElement.
      *
-     * @return A string containing the id, data, and line numbers of the element.
+     * @return A string containing the id, data, and XPath of the element.
      */
     @Override
     public String toString() {
-        return "EditedElement{" + "id='" + id + '\''
-                + ", data='" + data + '\''
-                + ", lineBegin=" + startLine + "\'"
-                + ", lineEnd=" + endLine + '}';
+        return "EditedElement{" +
+                "id='" + id + '\'' +
+                ", data='" + data + '\'' +
+                ", xPath='" + xPath + '\'' +
+                '}';
     }
 }
