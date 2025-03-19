@@ -109,7 +109,7 @@ public class XPathCustomParser implements IXPathCustomParser {
 
         private final Map<String, LineData> elements = new HashMap<>();
         private final Deque<String> pathStack = new ArrayDeque<>();
-        private final Map<String, Integer> elementCount = new HashMap<>();
+        private final Map<String, Map<String, Integer>> elementCount = new HashMap<>();
         private final Map<String, Integer> startLineMap = new HashMap<>();
         private Locator locator;
 
@@ -123,15 +123,25 @@ public class XPathCustomParser implements IXPathCustomParser {
             String tagName = stripNamespace(qName);
             int lineNumber = locator.getLineNumber();
 
-            // Track occurrence count for correct XPath indexing
-            elementCount.put(tagName, elementCount.getOrDefault(tagName, 0) + 1);
-            int index = elementCount.get(tagName);
-
             // Construct the XPath based on parent elements and current index
             String parentXPath = pathStack.isEmpty() ? "" : pathStack.peek();
+
+            // Initialize the count map for the current parent XPath if it doesn't exist
+            if (!elementCount.containsKey(parentXPath))
+                elementCount.put(parentXPath, new HashMap<>());
+
+            // Get the current count for the tag and increment it
+            Map<String, Integer> currentCounts = elementCount.get(parentXPath);
+            int index = currentCounts.getOrDefault(tagName, 0) + 1;
+            currentCounts.put(tagName, index);
+
+            // Build the current XPath using the parent path and the updated element index
             String xPath = String.format("%s/%s[%d]", parentXPath, tagName, index);
 
+            // Push the new XPath onto the stack
             pathStack.push(xPath);
+
+            // Store the start line number for the current element's XPath
             startLineMap.put(xPath, lineNumber);
         }
 
@@ -142,6 +152,7 @@ public class XPathCustomParser implements IXPathCustomParser {
             int startLine = startLineMap.getOrDefault(xPath, -1);
             int endLine = locator.getLineNumber();
 
+            // Store the element data with the start and end lines
             elements.put(xPath, new LineData(tagName, startLine, endLine));
         }
 
