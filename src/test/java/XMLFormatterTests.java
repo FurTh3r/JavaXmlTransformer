@@ -68,7 +68,7 @@ class XMLFormatterTests {
      */
     @Test
     void testFormatOntology() throws Exception {
-        Ontology formattedOntology = XMLFormatter.formatOntology(ontology);
+        Ontology formattedOntology = XMLFormatter.formatOntology(ontology, true);
         assertNotNull(formattedOntology);
         assertEquals(ontology.getOntologyName(), formattedOntology.getOntologyName());
         assertEquals(ontology.getOntologyExtension(), formattedOntology.getOntologyExtension());
@@ -102,7 +102,7 @@ class XMLFormatterTests {
     @Test
     void testFormatOntologyAlreadyFormatted() throws Exception {
         ontology.setXmlData(EXPECTED_FORMATTED_XML);
-        Ontology formattedOntology = XMLFormatter.formatOntology(ontology);
+        Ontology formattedOntology = XMLFormatter.formatOntology(ontology, true);
         assertEquals(EXPECTED_FORMATTED_XML, formattedOntology.getXmlData().trim());
     }
 
@@ -126,7 +126,7 @@ class XMLFormatterTests {
                 "    </owl:Class>" +
                 "</rdf:RDF>";
         ontology.setXmlData(unformattedXml);
-        Ontology formattedOntology = XMLFormatter.formatOntology(ontology);
+        Ontology formattedOntology = XMLFormatter.formatOntology(ontology, true);
         assertEquals(EXPECTED_FORMATTED_XML, formattedOntology.getXmlData().trim());
     }
 
@@ -152,7 +152,7 @@ class XMLFormatterTests {
                 </rdf:RDF>
                 """;
         ontology.setXmlData(xmlWithSpecialChars);
-        Ontology formattedOntology = XMLFormatter.formatOntology(ontology);
+        Ontology formattedOntology = XMLFormatter.formatOntology(ontology, true);
         assertTrue(formattedOntology.getXmlData().contains("&amp;"));
     }
 
@@ -163,7 +163,7 @@ class XMLFormatterTests {
     void testFormatOntologyWithInvalidXml() {
         ontology.setXmlData("<invalid><xml></invalid>");
         Exception exception = assertThrows(Exception.class, () -> {
-            XMLFormatter.formatOntology(ontology);
+            XMLFormatter.formatOntology(ontology, true);
         });
         assertNotNull(exception);
     }
@@ -188,7 +188,7 @@ class XMLFormatterTests {
      */
     @Test
     void testFormatOntologyPreservesNamespaces() throws Exception {
-        Ontology formattedOntology = XMLFormatter.formatOntology(ontology);
+        Ontology formattedOntology = XMLFormatter.formatOntology(ontology, true);
         assertTrue(formattedOntology.getXmlData().contains("xmlns:rdf="));
         assertTrue(formattedOntology.getXmlData().contains("xmlns:owl="));
         assertTrue(formattedOntology.getXmlData().contains("xmlns:rdfs="));
@@ -204,7 +204,7 @@ class XMLFormatterTests {
      */
     @Test
     void testFormatOntologyPreservesXmlDeclaration() throws Exception {
-        Ontology formattedOntology = XMLFormatter.formatOntology(ontology);
+        Ontology formattedOntology = XMLFormatter.formatOntology(ontology, true);
         assertTrue(formattedOntology.getXmlData().startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"));
     }
 
@@ -230,7 +230,7 @@ class XMLFormatterTests {
                 </rdf:RDF>
                 """;
         ontology.setXmlData(xmlWithSpecialChars);
-        Ontology formattedOntology = XMLFormatter.formatOntology(ontology);
+        Ontology formattedOntology = XMLFormatter.formatOntology(ontology, true);
         assertTrue(formattedOntology.getXmlData().contains("&amp;"));
         assertTrue(formattedOntology.getXmlData().contains("&lt;"));
         assertTrue(formattedOntology.getXmlData().contains("&gt;"));
@@ -258,7 +258,7 @@ class XMLFormatterTests {
                 </rdf:RDF> \t\t\t
                 """;
         ontology.setXmlData(xmlWithWhitespaces);
-        Ontology formattedOntology = XMLFormatter.formatOntology(ontology);
+        Ontology formattedOntology = XMLFormatter.formatOntology(ontology, true);
         assertEquals(EXPECTED_FORMATTED_XML, formattedOntology.getXmlData().trim());
     }
 
@@ -292,7 +292,7 @@ class XMLFormatterTests {
                 </rdf:RDF>
                 """;
         ontology.setXmlData(xmlWithEmptyElement);
-        Ontology formattedOntology = XMLFormatter.formatOntology(ontology);
+        Ontology formattedOntology = XMLFormatter.formatOntology(ontology, true);
         assertEquals(expected.trim(), formattedOntology.getXmlData().trim());
     }
 
@@ -340,7 +340,7 @@ class XMLFormatterTests {
                 </rdf:RDF>
                 """;
         ontology.setXmlData(complexXml);
-        Ontology formattedOntology = XMLFormatter.formatOntology(ontology);
+        Ontology formattedOntology = XMLFormatter.formatOntology(ontology, true);
         assertEquals(expected.trim(), formattedOntology.getXmlData().trim());
     }
 
@@ -366,7 +366,8 @@ class XMLFormatterTests {
                 </rdf:RDF>
                 """;
         ontology.setXmlData(xmlWithMultipleNamespaces);
-        assertThrows(Exception.class, () -> XMLFormatter.formatOntology(ontology), "duplicated namespaces");
+        assertThrows(Exception.class, () -> XMLFormatter.formatOntology(ontology, true),
+                "duplicated namespaces");
     }
 
     /**
@@ -392,7 +393,7 @@ class XMLFormatterTests {
                 </rdf:RDF>
                 """;
         ontology.setXmlData(xmlWithSpecialCharsInAttributes);
-        Ontology formattedOntology = XMLFormatter.formatOntology(ontology);
+        Ontology formattedOntology = XMLFormatter.formatOntology(ontology, true);
         assertTrue(formattedOntology.getXmlData().contains("&lt;"));
         assertTrue(formattedOntology.getXmlData().contains("&gt;"));
         assertTrue(formattedOntology.getXmlData().contains("&amp;"));
@@ -420,7 +421,7 @@ class XMLFormatterTests {
                 </rdf:RDF>\r
                 """;
         ontology.setXmlData(xmlWithMixedLineEndings);
-        Ontology formattedOntology = XMLFormatter.formatOntology(ontology);
+        Ontology formattedOntology = XMLFormatter.formatOntology(ontology, true);
         assertEquals(EXPECTED_FORMATTED_XML, formattedOntology.getXmlData().trim());
     }
 
@@ -438,6 +439,33 @@ class XMLFormatterTests {
                  xmlns:owl="http://www.w3.org/2002/07/owl#"
                  xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
                  xmlns:skos="http://www.w3.org/2004/02/skos/core#" xml:base="http://www.persone/">
+                """ + ("""
+                  <owl:Class rdf:about="http://www.persone#Individuo">
+                    \
+                <rdfs:label xml:lang="it">Ind</rdfs:label>
+                  </owl:Class>
+                """).repeat(1000) +
+                "</rdf:RDF>";
+
+        ontology.setXmlData(largeXml);
+        long startTime = System.currentTimeMillis();
+        Ontology formattedOntology = XMLFormatter.formatOntology(ontology, true);
+        long endTime = System.currentTimeMillis();
+        System.out.println("Large XML formatting took: " + (endTime - startTime) + "ms");
+        assertNotNull(formattedOntology);
+    }
+
+    /**
+     * Performance test for the {@link XMLFormatter#formatOntology(Ontology)} method with large XML files.
+     * This test verifies that the method can handle large XML datasets efficiently.
+     *
+     * @throws Exception if an error occurs during the formatting process
+     */
+    @Test
+    void testFormatOntologyWithLargeFileSingleLineNamespaces() throws Exception {
+        String largeXml = """
+                <?xml version="1.0" encoding="UTF-8"?>
+                <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xml:base="http://www.persone/">
                 """ + ("""
                   <owl:Class rdf:about="http://www.persone#Individuo">
                     \

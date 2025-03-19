@@ -28,15 +28,43 @@ import java.io.StringWriter;
  */
 public class XMLFormatter {
 
+    private static boolean formatNamespacesOnNewLine = false;
+
+    /**
+     * Formats an XML file by adding proper indentation and returns the formatted XML as a string.
+     *
+     * @param filePath                  The path of the XML file to format.
+     * @param formatNamespacesOnNewLine A flag to indicate whether to break lines for namespaces.
+     * @return A formatted XML string.
+     * @throws Exception   If an error occurs during file processing.
+     * @throws IOException If the file cannot be found.
+     */
+    public static String formatXML(String filePath, boolean formatNamespacesOnNewLine) throws Exception {
+        XMLFormatter.formatNamespacesOnNewLine = formatNamespacesOnNewLine;
+        return formatXMLInner(filePath);
+    }
+
     /**
      * Formats an XML file by adding proper indentation and returns the formatted XML as a string.
      *
      * @param filePath The path of the XML file to format.
      * @return A formatted XML string.
-     * @throws Exception If an error occurs during file processing.
+     * @throws Exception   If an error occurs during file processing.
      * @throws IOException If the file cannot be found.
      */
     public static String formatXML(String filePath) throws Exception {
+        return formatXMLInner(filePath);
+    }
+
+    /**
+     * Formats an XML file by adding proper indentation and returns the formatted XML as a string.
+     *
+     * @param filePath The path of the XML file to format.
+     * @return A formatted XML string.
+     * @throws Exception   If an error occurs during file processing.
+     * @throws IOException If the file cannot be found.
+     */
+    private static String formatXMLInner(String filePath) throws Exception {
         File xmlFile = new File(filePath);
 
         // Check if the file exists
@@ -51,7 +79,7 @@ public class XMLFormatter {
      *
      * @param xmlFile The XML file to format.
      * @return A formatted XML string.
-     * @throws Exception If an error occurs during file processing.
+     * @throws Exception         If an error occurs during file processing.
      * @throws SAXParseException If there are errors in the XML syntax.
      */
     private static String formatXMLFromFile(File xmlFile) throws Exception {
@@ -78,11 +106,37 @@ public class XMLFormatter {
      * Formats the XML data of the given {@link Ontology} object
      * and returns a new {@link Ontology} object with the formatted XML data.
      *
+     * @param ontology                  The Ontology object whose XML data needs to be formatted.
+     * @param formatNamespacesOnNewLine A flag to indicate whether to break lines for namespaces.
+     * @return A new Ontology object with the reformatted XML data.
+     * @throws Exception If an error occurs during XML formatting.
+     */
+    public static Ontology formatOntology(Ontology ontology, boolean formatNamespacesOnNewLine) throws Exception {
+        XMLFormatter.formatNamespacesOnNewLine = formatNamespacesOnNewLine;
+        return formatOntologyInner(ontology);
+    }
+
+    /**
+     * Formats the XML data of the given {@link Ontology} object
+     * and returns a new {@link Ontology} object with the formatted XML data.
+     *
      * @param ontology The Ontology object whose XML data needs to be formatted.
      * @return A new Ontology object with the reformatted XML data.
      * @throws Exception If an error occurs during XML formatting.
      */
     public static Ontology formatOntology(Ontology ontology) throws Exception {
+        return formatOntologyInner(ontology);
+    }
+
+    /**
+     * Formats the XML data of the given {@link Ontology} object
+     * and returns a new {@link Ontology} object with the formatted XML data.
+     *
+     * @param ontology The Ontology object whose XML data needs to be formatted.
+     * @return A new Ontology object with the reformatted XML data.
+     * @throws Exception If an error occurs during XML formatting.
+     */
+    private static Ontology formatOntologyInner(Ontology ontology) throws Exception {
         if (ontology == null || ontology.getXmlData() == null || ontology.getXmlData().isEmpty())
             throw new IllegalArgumentException("Ontology is either null or empty.");
 
@@ -101,7 +155,7 @@ public class XMLFormatter {
      *
      * @param xmlData The XML data as a string.
      * @return The formatted XML string.
-     * @throws Exception If an error occurs during XML processing.
+     * @throws Exception         If an error occurs during XML processing.
      * @throws SAXParseException If there are errors in the XML syntax.
      */
     public static String formatXMLFromString(String xmlData) throws Exception {
@@ -139,13 +193,13 @@ public class XMLFormatter {
      */
     private static String transformDocumentToString(Document document) throws Exception {
         try {
-            // Rimuove nodi di testo vuoti
+            // Removing empty XML nodes
             removeEmptyTextNodes(document);
 
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
 
-            // Imposta le proprietà per una formattazione pulita
+            // Clean formatting settings
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
             transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
@@ -168,11 +222,12 @@ public class XMLFormatter {
      * @return The formatted XML string.
      */
     private static String finalFormatting(String xml) {
-        // RegEx per trovare le dichiarazioni xmlns
+        // RegEx to find namespaces
         String regex = "(xmlns:[a-zA-Z0-9\\-]+=\"[^\"]*\")";
 
-        // Sostituisce ogni dichiarazione xmlns con la stessa dichiarazione seguita da una nuova riga
-        xml = xml.replaceAll(regex, "$0\n");
+        // xmlns namespaces in multiple lines
+        if (formatNamespacesOnNewLine)
+            xml = xml.replaceAll(regex, "$0\n");
         xml = xml.replace("\r\n", "\n"); // Normalize to LF
 
         return xml;
