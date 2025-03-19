@@ -63,6 +63,26 @@ public class XPathCustomParser implements IXPathCustomParser {
     }
 
     /**
+     * Retrieves the start and end line numbers for all XPath elements.
+     * <p>
+     * This method returns a map where the key is the XPath of an XML element and the value is a
+     * {@link MyPair} containing the start and end line numbers for that element.
+     *
+     * @return A map with XPath as the key and a {@link MyPair} of integers representing the start
+     * and end line numbers of the element.
+     * If no data is available, an empty map is returned.
+     */
+    public Map<String, MyPair<Integer, Integer>> getAllInfo() {
+        if (lines == null)
+            return Collections.emptyMap(); // Return an empty map if lines is null
+
+        Map<String, MyPair<Integer, Integer>> info = new HashMap<>();
+        lines.forEach((key, value) ->
+                info.put(key, new MyPair<>(value.beginLineNumber, value.endLineNumber)));
+        return info;
+    }
+
+    /**
      * Represents the line data for an XML element.
      */
     private record LineData(String tagName, int beginLineNumber, int endLineNumber) {
