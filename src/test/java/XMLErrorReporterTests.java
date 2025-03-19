@@ -1,137 +1,236 @@
 import com.jataxmltransformer.logic.data.EditedElement;
 import com.jataxmltransformer.logic.data.ErrorInfo;
+import com.jataxmltransformer.logic.xml.IXMLErrorReporter;
 import com.jataxmltransformer.logic.xml.XMLErrorReporter;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.w3c.dom.Node;
+import org.junit.Before;
+import org.junit.Test;
 
-import javax.xml.xpath.XPathExpressionException;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
-/**
- * Unit tests for the {@link XMLErrorReporter} class.
- * This class verifies the correctness of XML parsing, XPath evaluation,
- * and error reporting functionalities.
- */
 public class XMLErrorReporterTests {
 
-    private XMLErrorReporter xmlErrorReporter;
+    private IXMLErrorReporter xmlErrorReporter;
 
     /**
      * Sample XML string used for testing.
      */
-    private final String xmlString = """
-            <root>
-                <item id="1">Value1</item>
-                <item id="2">Value2</item>
-            </root>
+    private final String xmlString1 = """
+            <?xml version="1.0" encoding="UTF-8"?>
+                <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:owl="http://www.w3.org/2002/07/owl#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xml:base="http://www.persone/">
+                    <rdfs:label xml:lang="it">Ind</rdfs:label>
+                    <owl:Class rdf:about="http://www.persone#Individuo">
+                        <rdfs:label xml:lang="it">Ind</rdfs:label>
+                        <skos:scopeNote xml:lang="it">Class</skos:scopeNote>
+                    </owl:Class>
+                    <owl:Class rdf:about="http://www.persone#Individuo">
+                        <rdfs:label xml:lang="it">Ind</rdfs:label>
+                        <skos:scopeNote xml:lang="it">Class</skos:scopeNote>
+                    </owl:Class>
+                    <owl:Class rdf:about="http://www.persone#Individuo">
+                        <rdfs:label xml:lang="it">Ind</rdfs:label>
+                        <skos:scopeNote xml:lang="it">Class</skos:scopeNote>
+                    </owl:Class>
+                </rdf:RDF>
             """;
 
-    /**
-     * Sets up a new {@link XMLErrorReporter} instance before each test.
-     *
-     * @throws Exception if XML parsing fails.
-     */
-    @BeforeEach
-    void setUp() throws Exception {
-        xmlErrorReporter = new XMLErrorReporter(xmlString);
+    @Before
+    public void setUp() {
+        // Initialize XMLErrorReporter with the custom parser
+        xmlErrorReporter = new XMLErrorReporter(xmlString1);
     }
 
-    /**
-     * Tests finding a valid node using an XPath expression.
-     *
-     * @throws Exception if XPath evaluation fails.
-     */
     @Test
-    void testFindNodeByXPath_ValidXPath() throws Exception {
-        Node node = xmlErrorReporter.findNodeByXPath("/root/item[@id='1']");
-        assertNotNull(node, "Node should not be null");
-        assertEquals("item", node.getNodeName(), "Node name should be 'item'");
+    public void testGenerateErrorInfo_withValidData() {
+        // Prepare test data (EditedElement)
+        EditedElement editedElement = new EditedElement("elementId", "Modified Data",
+                "/RDF[1]/Class[1]");
+        List<EditedElement> editedElements = List.of(editedElement);
+
+        // Act: Generate the error information
+        List<ErrorInfo> errorInfos = xmlErrorReporter.generateErrorInfo(editedElements);
+
+        // Assert: Verify that the error info matches the expected result
+        assertEquals(1, errorInfos.size()); // We expect one error info
+        ErrorInfo errorInfo = errorInfos.getFirst();
+        assertEquals(4, errorInfo.startLine());
+        assertEquals(7, errorInfo.endLine());
+        assertEquals("elementId", errorInfo.errorMessage()); // Based on the EditedElement id
+        assertEquals("Modified Data", errorInfo.elementDetails()); // Based on the EditedElement data
     }
 
-    /**
-     * Tests finding a node using an invalid XPath expression.
-     * Ensures that an invalid expression does not crash the system.
-     *
-     * @throws XPathExpressionException if XPath expression fails.
-     */
     @Test
-    void testFindNodeByXPath_InvalidXPath() throws XPathExpressionException {
-        assertNull(xmlErrorReporter.findNodeByXPath("invalid_xpath"));
+    public void testGenerateErrorInfo_withFakeError() {
+        // Arrange: EditedElement with a fake error XPath "/RDF[1]"
+        EditedElement editedElement = new EditedElement("elementId", "Modified Data", "/RDF[1]");
+        List<EditedElement> editedElements = List.of(editedElement);
+
+        // Act: Generate the error information (this should skip the "/RDF[1]" element)
+        List<ErrorInfo> errorInfos = xmlErrorReporter.generateErrorInfo(editedElements);
+
+        // Assert: Verify that no error info is generated for the fake error
+        assertEquals(0, errorInfos.size()); // No errors should be reported for the fake XPath
     }
 
-    /**
-     * Tests searching for a node that does not exist in the XML document.
-     *
-     * @throws Exception if XPath evaluation fails.
-     */
     @Test
-    void testFindNodeByXPath_NonexistentNode() throws Exception {
-        Node node = xmlErrorReporter.findNodeByXPath("/root/item[@id='3']");
-        assertNull(node, "Node should be null for nonexistent elements");
+    public void testGenerateErrorInfo_withNoMatchingXPath() {
+        EditedElement editedElement = new EditedElement("elementId", "Modified Data",
+                "/RDF[1]/unknownElement[1]");
+        List<EditedElement> editedElements = List.of(editedElement);
+
+        // Act: Generate the error information
+        List<ErrorInfo> errorInfos = xmlErrorReporter.generateErrorInfo(editedElements);
+
+        // Assert: Verify that no error info is generated for the non-existent XPath
+        assertEquals(0, errorInfos.size()); // No errors should be reported for invalid XPath
     }
 
-    /**
-     * Tests generating error information for valid elements found in the XML document.
-     *
-     * @throws Exception if XML processing fails.
-     */
     @Test
-    void testGenerateErrorInfo_ValidElements() throws Exception {
-        List<EditedElement> editedElements = new ArrayList<>();
-        EditedElement editedElement1 = new EditedElement();
-        editedElement1.setxPath("/root/item[@id='1']");
-        editedElements.add(editedElement1);
+    public void testGenerateErrorInfo_withMultipleEditedElements() {
+        // Arrange: Multiple EditedElements
+        EditedElement editedElement1 = new EditedElement("elementId1", "Modified Data 1",
+                "/RDF[1]/Class[1]");
+        EditedElement editedElement2 = new EditedElement("elementId2", "Modified Data 2",
+                "/RDF[1]/Class[2]");
+        List<EditedElement> editedElements = List.of(editedElement1, editedElement2);
 
-        EditedElement editedElement2 = new EditedElement();
-        editedElement2.setxPath("/root/item[@id='2']");
-        editedElements.add(editedElement2);
+        // Act: Generate the error information
+        List<ErrorInfo> errorInfos = xmlErrorReporter.generateErrorInfo(editedElements);
 
-        List<ErrorInfo> errors = xmlErrorReporter.generateErrorInfo(xmlString, editedElements);
-        assertEquals(2, errors.size(), "There should be 2 errors reported");
-
-        assertTrue(errors.getFirst().errorMessage().contains("Error in element"),
-                "Error message should be generated");
+        // Assert: Verify that both edited elements are processed
+        assertEquals(2, errorInfos.size());
+        assertEquals("elementId1", errorInfos.getFirst().errorMessage());
+        assertEquals(4, errorInfos.get(0).startLine());
+        assertEquals(7, errorInfos.get(0).endLine());
+        assertEquals("elementId2", errorInfos.get(1).errorMessage());
+        assertEquals(8, errorInfos.get(1).startLine());
+        assertEquals(11, errorInfos.get(1).endLine());
     }
 
-    /**
-     * Tests generating error information for an element that does not exist in the XML document.
-     *
-     * @throws Exception if XML processing fails.
-     */
     @Test
-    void testGenerateErrorInfo_NonexistentElement() throws Exception {
-        List<EditedElement> editedElements = new ArrayList<>();
-        EditedElement editedElement = new EditedElement();
-        editedElement.setxPath("/root/nonexistent");
-        editedElements.add(editedElement);
+    public void testGenerateErrorInfo_withNullDataInEditedElement() {
+        // Arrange: EditedElement with null data
+        EditedElement editedElement = new EditedElement("elementId", null, "/RDF[1]/Class[1]");
+        List<EditedElement> editedElements = List.of(editedElement);
 
-        List<ErrorInfo> errors = xmlErrorReporter.generateErrorInfo(xmlString, editedElements);
-        assertEquals(0, errors.size(), "No errors should be reported for nonexistent elements");
+        // Act: Generate the error information
+        List<ErrorInfo> errorInfos = xmlErrorReporter.generateErrorInfo(editedElements);
+
+        // Assert: Verify that null data is handled
+        assertEquals(1, errorInfos.size());
+        assertEquals("elementId", errorInfos.getFirst().errorMessage());
+        assertNull(errorInfos.getFirst().elementDetails()); // Expecting "null" for empty data
     }
 
-    /**
-     * Tests handling of an empty XML string.
-     * Ensures that the system fails gracefully when parsing an empty input.
-     */
     @Test
-    void testGenerateErrorInfo_EmptyXMLString() {
-        Exception exception = assertThrows(Exception.class, () -> new XMLErrorReporter(""));
-        assertTrue(exception.getMessage().contains("Premature end of file"), "Should fail due to empty XML");
+    public void testGenerateErrorInfo_withNestedElements() {
+        // Arrange: EditedElement with a nested element XPath
+        EditedElement editedElement = new EditedElement("elementId", "Modified Data",
+                "/RDF[1]/Class[1]/label[1]");
+        List<EditedElement> editedElements = List.of(editedElement);
+
+        // Act: Generate the error information
+        List<ErrorInfo> errorInfos = xmlErrorReporter.generateErrorInfo(editedElements);
+
+        // Assert: Verify that the nested element's line numbers and data are processed
+        assertEquals(1, errorInfos.size());
+        assertEquals("elementId", errorInfos.getFirst().errorMessage());
+        assertEquals("Modified Data", errorInfos.getFirst().elementDetails());
+        assertEquals(5, errorInfos.getFirst().startLine()); // Should correspond to the rdfs:label element
+        assertEquals(5, errorInfos.getFirst().endLine());
     }
 
-    /**
-     * Tests handling of a malformed XML string.
-     * Ensures that the system detects structural errors in the XML input.
-     */
     @Test
-    void testGenerateErrorInfo_MalformedXML() {
-        String malformedXML = "<root><item>Value1</item"; // Missing closing bracket
-        Exception exception = assertThrows(Exception.class, () -> new XMLErrorReporter(malformedXML));
-        assertTrue(exception.getMessage().contains("XML document structures must start and end within the same entity"),
-                "Should fail due to malformed XML");
+    public void testGenerateErrorInfo_withEmptyEditedElementsList() {
+        // Arrange: Empty list of EditedElements
+        List<EditedElement> editedElements = Collections.emptyList();
+
+        // Act: Generate the error information
+        List<ErrorInfo> errorInfos = xmlErrorReporter.generateErrorInfo(editedElements);
+
+        // Assert: Verify that no error info is generated
+        assertEquals(0, errorInfos.size()); // No errors should be reported for an empty list
+    }
+
+    @Test
+    public void testGenerateErrorInfo_withInvalidXPathFormat() {
+        // Arrange: EditedElement with an invalid XPath format
+        EditedElement editedElement = new EditedElement("elementId", "Modified Data", "invalidXPath");
+        List<EditedElement> editedElements = List.of(editedElement);
+
+        // Act: Generate the error information
+        List<ErrorInfo> errorInfos = xmlErrorReporter.generateErrorInfo(editedElements);
+
+        // Assert: Verify that no error info is generated for invalid XPath format
+        assertEquals(0, errorInfos.size()); // No errors should be reported for invalid XPath format
+    }
+
+    @Test
+    public void testGenerateErrorInfo_withDeeplyNestedElement() {
+        // Arrange: EditedElement with a deeply nested element XPath
+        EditedElement editedElement = new EditedElement("elementId", "Modified Data",
+                "/RDF[1]/Class[1]/scopeNote[1]");
+        List<EditedElement> editedElements = List.of(editedElement);
+
+        // Act: Generate the error information
+        List<ErrorInfo> errorInfos = xmlErrorReporter.generateErrorInfo(editedElements);
+
+        // Assert: Verify that the deeply nested element's line numbers and data are processed
+        assertEquals(1, errorInfos.size());
+        assertEquals("elementId", errorInfos.getFirst().errorMessage());
+        assertEquals("Modified Data", errorInfos.getFirst().elementDetails());
+        assertEquals(6, errorInfos.getFirst().startLine()); // Should correspond to the skos:scopeNote element
+        assertEquals(6, errorInfos.getFirst().endLine());
+    }
+
+    @Test
+    public void testGenerateErrorInfo_withMultipleNestedElements() {
+        // Arrange: Multiple EditedElements with nested XPaths
+        EditedElement editedElement1 = new EditedElement("elementId1", "Modified Data 1",
+                "/RDF[1]/Class[1]/label[1]");
+        EditedElement editedElement2 = new EditedElement("elementId2", "Modified Data 2",
+                "/RDF[1]/Class[2]/scopeNote[1]");
+        List<EditedElement> editedElements = List.of(editedElement1, editedElement2);
+
+        // Act: Generate the error information
+        List<ErrorInfo> errorInfos = xmlErrorReporter.generateErrorInfo(editedElements);
+
+        // Assert: Verify that both nested elements are processed
+        assertEquals(2, errorInfos.size());
+        assertEquals("elementId1", errorInfos.getFirst().errorMessage());
+        assertEquals(5, errorInfos.get(0).startLine());
+        assertEquals(5, errorInfos.get(0).endLine());
+        assertEquals("elementId2", errorInfos.get(1).errorMessage());
+        assertEquals(10, errorInfos.get(1).startLine());
+        assertEquals(10, errorInfos.get(1).endLine());
+    }
+
+    @Test
+    public void testGenerateErrorInfo_withNullXPath() {
+        // Arrange: EditedElement with null XPath
+        EditedElement editedElement = new EditedElement("elementId", "Modified Data", null);
+        List<EditedElement> editedElements = List.of(editedElement);
+
+        // Act: Generate the error information
+        List<ErrorInfo> errorInfos = xmlErrorReporter.generateErrorInfo(editedElements);
+
+        // Assert: Verify that no error info is generated for null XPath
+        assertEquals(0, errorInfos.size()); // No errors should be reported for null XPath
+    }
+
+    @Test
+    public void testGenerateErrorInfo_withEmptyXPath() {
+        // Arrange: EditedElement with empty XPath
+        EditedElement editedElement = new EditedElement("elementId", "Modified Data", "");
+        List<EditedElement> editedElements = List.of(editedElement);
+
+        // Act: Generate the error information
+        List<ErrorInfo> errorInfos = xmlErrorReporter.generateErrorInfo(editedElements);
+
+        // Assert: Verify that no error info is generated for empty XPath
+        assertEquals(0, errorInfos.size()); // No errors should be reported for empty XPath
     }
 }
