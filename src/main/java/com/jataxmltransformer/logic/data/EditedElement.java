@@ -9,6 +9,24 @@ public class EditedElement {
     private String xPath;
 
     /**
+     * Constructor for the EditedElement class
+     *
+     * @param data  of the edited element
+     * @param id    of the edited element
+     * @param xPath of the edited element
+     */
+    public EditedElement(String data, String id, String xPath) {
+        this.data = data;
+        this.id = id;
+        this.xPath = xPath;
+    }
+    /**
+     * Constructor for the EditedElement class
+     */
+    public EditedElement() {
+    }
+
+    /**
      * Gets the identifier of the edited element.
      *
      * @return The identifier of the edited element.
@@ -49,7 +67,7 @@ public class EditedElement {
      *
      * @return The XPath expression of the edited element.
      */
-    public String getxPath() {
+    public String getXPath() {
         return xPath;
     }
 
@@ -58,7 +76,7 @@ public class EditedElement {
      *
      * @param xPath The XPath expression to set.
      */
-    public void setxPath(String xPath) {
+    public void setXPath(String xPath) {
         this.xPath = xPath;
     }
 

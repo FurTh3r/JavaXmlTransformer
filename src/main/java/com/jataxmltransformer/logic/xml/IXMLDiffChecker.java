@@ -13,7 +13,7 @@ import java.util.List;
  * Differences are stored as a list of {@code EditedElement} objects.
  * </p>
  */
-public interface DiffChecker {
+public interface IXMLDiffChecker {
     /**
      * Compares two XML files and returns a list of differences.
      *

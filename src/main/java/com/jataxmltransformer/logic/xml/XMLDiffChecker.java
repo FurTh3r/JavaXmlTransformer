@@ -20,47 +20,7 @@ import java.util.Set;
  * by their file paths or ontology objects and returns a list of {@link EditedElement}
  * objects representing the detected differences.
  */
-public class XMLDiffChecker implements DiffChecker {
-
-    /**
-     * Compares two XML files and identifies the differences between them.
-     *
-     * @param inputXMLPath  The path to the original (control) XML file.
-     * @param outputXMLPath The path to the modified (test) XML file.
-     * @return A list of {@link EditedElement} objects representing the differences found.
-     * @throws IOException If an error occurs while reading the XML files (e.g., file not found).
-     */
-    @Override
-    public List<EditedElement> diffXmlFiles(String inputXMLPath, String outputXMLPath) throws IOException {
-        File inputXML = new File(inputXMLPath);
-        File outputXML = new File(outputXMLPath);
-
-        if (!inputXML.exists() || !outputXML.exists())
-            throw new IOException("One or both XML files do not exist.");
-
-        try {
-            return diff(new StreamSource(inputXML), new StreamSource(outputXML), inputXMLPath);
-        } catch (Exception e) {
-            AppLogger.severe("Error comparing XML files: " + e.getMessage());
-            throw new IOException("Error comparing XML files", e);
-        }
-    }
-
-    /**
-     * Compares two ontology objects and identifies the differences between their XML data.
-     *
-     * @param inputOntology  The input ontology data (control ontology).
-     * @param outputOntology The output ontology data (test ontology).
-     * @return A list of {@link EditedElement} objects representing the differences found.
-     * @throws Exception If an error occurs during the comparison (e.g., invalid XML data).
-     */
-    @Override
-    public List<EditedElement> diffOntologies(Ontology inputOntology, Ontology outputOntology) throws Exception {
-        if (inputOntology == null || outputOntology == null)
-            throw new IllegalArgumentException("Input or output ontology cannot be null.");
-
-        return diff(inputOntology.getXmlData(), outputOntology.getXmlData(), null);
-    }
+public class XMLDiffChecker implements IXMLDiffChecker {
 
     /**
      * Compares two XML sources (files or strings) and identifies the differences.
@@ -159,8 +119,6 @@ public class XMLDiffChecker implements DiffChecker {
         // Determine which block of XML content (test or control) is being edited
         String testBlock = comparison.getTestDetails().getValue() != null ? comparison.getTestDetails()
                 .getValue().toString() : "";
-        String controlBlock = comparison.getControlDetails().getValue() != null ? comparison.getControlDetails()
-                .getValue().toString() : "";
 
         // Set the edited element's data
         editedElement.setData(testBlock); // Store the full test block data
@@ -175,7 +133,7 @@ public class XMLDiffChecker implements DiffChecker {
         editedElement.setId("Control XPath: " + controlXPath + " => Test XPath: " + testXPath + " | Context: " + context);
 
         // Set the XPath for the edited element
-        editedElement.setxPath(controlXPath);
+        editedElement.setXPath(controlXPath);
 
         return editedElement;
     }
@@ -202,5 +160,45 @@ public class XMLDiffChecker implements DiffChecker {
      */
     private static String getNodeName(Object node) {
         return (node instanceof org.w3c.dom.Node) ? ((org.w3c.dom.Node) node).getNodeName() : "Unknown";
+    }
+
+    /**
+     * Compares two XML files and identifies the differences between them.
+     *
+     * @param inputXMLPath  The path to the original (control) XML file.
+     * @param outputXMLPath The path to the modified (test) XML file.
+     * @return A list of {@link EditedElement} objects representing the differences found.
+     * @throws IOException If an error occurs while reading the XML files (e.g., file not found).
+     */
+    @Override
+    public List<EditedElement> diffXmlFiles(String inputXMLPath, String outputXMLPath) throws IOException {
+        File inputXML = new File(inputXMLPath);
+        File outputXML = new File(outputXMLPath);
+
+        if (!inputXML.exists() || !outputXML.exists())
+            throw new IOException("One or both XML files do not exist.");
+
+        try {
+            return diff(new StreamSource(inputXML), new StreamSource(outputXML), inputXMLPath);
+        } catch (Exception e) {
+            AppLogger.severe("Error comparing XML files: " + e.getMessage());
+            throw new IOException("Error comparing XML files", e);
+        }
+    }
+
+    /**
+     * Compares two ontology objects and identifies the differences between their XML data.
+     *
+     * @param inputOntology  The input ontology data (control ontology).
+     * @param outputOntology The output ontology data (test ontology).
+     * @return A list of {@link EditedElement} objects representing the differences found.
+     * @throws Exception If an error occurs during the comparison (e.g., invalid XML data).
+     */
+    @Override
+    public List<EditedElement> diffOntologies(Ontology inputOntology, Ontology outputOntology) throws Exception {
+        if (inputOntology == null || outputOntology == null)
+            throw new IllegalArgumentException("Input or output ontology cannot be null.");
+
+        return diff(inputOntology.getXmlData(), outputOntology.getXmlData(), null);
     }
 }
