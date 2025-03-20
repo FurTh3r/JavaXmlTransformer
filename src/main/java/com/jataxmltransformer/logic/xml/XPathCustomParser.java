@@ -48,6 +48,31 @@ public class XPathCustomParser implements IXPathCustomParser {
     }
 
     /**
+     * Extracts the valid part of an XPath-like string up to the first invalid segment.
+     * A valid segment follows the pattern "something[n]" where "something" is a word and "n" is a number.
+     *
+     * @param xPath The XPath-like input string.
+     * @return The cut path with valid segments only.
+     */
+    private static String getCutPath(String xPath) {
+        String regex = "^[a-zA-Z]+\\[\\d+]$";
+        String[] parts = xPath.split("/+");
+
+        StringBuilder stringBuilder = new StringBuilder();
+
+        for (String part : parts) {
+            if (part.isEmpty()) continue; // Skip empty parts
+            if (part.matches(regex)) {
+                stringBuilder.append("/"); // Maintain the XPath-like structure
+                stringBuilder.append(part);
+            } else
+                break; // Stop at the first invalid part
+        }
+
+        return stringBuilder.toString();
+    }
+
+    /**
      * Retrieves the start and end line numbers for the given XPath.
      *
      * @param xPath The XPath to search for.
@@ -55,10 +80,12 @@ public class XPathCustomParser implements IXPathCustomParser {
      */
     @Override
     public MyPair<Integer, Integer> getInfoFromXPath(String xPath) {
-        LineData lineData = lines.get(xPath);
-        if (lineData == null) {
+        // Getting the xPath cut if there are any ignorable xPath levels
+        final String key = getCutPath(xPath);
+        LineData lineData = key.isEmpty() ? null : lines.get(key);
+
+        if (lineData == null)
             return new MyPair<>(-1, -1); // Default value when XPath is not found
-        }
         return new MyPair<>(lineData.beginLineNumber, lineData.endLineNumber);
     }
 
