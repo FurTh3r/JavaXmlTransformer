@@ -12,6 +12,7 @@ module XmlTransformer {
     exports com.jataxmltransformer.logic.cducecompiler;
     exports com.jataxmltransformer.logic.data;
     exports com.jataxmltransformer.logic.xml;
+    exports com.jataxmltransformer.logic.utilities;
     exports com.jataxmltransformer.logs;
     opens com.jataxmltransformer.logic.cducecompiler;
     opens com.jataxmltransformer.GUI;

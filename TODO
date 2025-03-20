@@ -1,0 +1,10 @@
+########################################################################################################################
+TODO 1: Ensure the diff check works both ways.
+// Currently, removing elements is correctly handled by the error checker, but adding new elements is ignored.
+// This happens because when an element is added, the starting xPath causes generateErrorInfo to skip it.
+// To fix this, consider both ontology structures:
+// - If the first xPath is null, check the xPath of the output.
+// - If the output xPath is null, check the first xPath.
+// This way, the checker will correctly detect differences in both directions.
+
+########################################################################################################################

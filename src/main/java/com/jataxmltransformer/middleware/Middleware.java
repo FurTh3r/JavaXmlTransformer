@@ -7,9 +7,10 @@ import com.jataxmltransformer.logic.data.EditedElement;
 import com.jataxmltransformer.logic.data.ErrorInfo;
 import com.jataxmltransformer.logic.data.Ontology;
 import com.jataxmltransformer.logic.xml.XMLDiffChecker;
+import com.jataxmltransformer.logic.xml.XMLErrorReporter;
+import com.jataxmltransformer.logic.xml.XMLFormatter;
 import com.jataxmltransformer.logs.AppLogger;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -29,6 +30,7 @@ public class Middleware {
     private Middleware() {
         checkStructure = new CheckStructure();
         ontologyInput = new Ontology();
+        ontologyOutput = new Ontology();
     }
 
     /**
@@ -49,6 +51,39 @@ public class Middleware {
      */
     public static void resetInstance() {
         instance = null;
+    }
+
+    /**
+     * Retrieves the list of errors found when comparing the input and output ontologies.
+     * The method compares the XML data of the input and output ontologies and checks for any differences.
+     * If differences are found, it generates error information for the mismatched elements.
+     * If no differences are detected or the ontologies are invalid, an empty list is returned.
+     *
+     * @return A list of {@link ErrorInfo} objects representing the differences between the input and output ontologies.
+     * Returns an empty list if there are no differences or if either of the ontologies is invalid.
+     * @throws Exception If an error occurs while processing the ontologies or generating the error information.
+     */
+    public static List<ErrorInfo> getErrors() throws Exception {
+        // Validate ontology input and output before proceeding
+        if (Middleware.ontologyInput == null || Middleware.ontologyOutput == null ||
+                Middleware.ontologyInput.isEmpty() || Middleware.ontologyOutput.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // Parse ontology XML and get the differences
+        Ontology ontologyInput = XMLFormatter.formatOntology(Middleware.ontologyInput);
+        Ontology ontologyOutput = XMLFormatter.formatOntology(Middleware.ontologyOutput);
+
+        XMLDiffChecker xmlDiffChecker = new XMLDiffChecker();
+        List<EditedElement> differences = xmlDiffChecker.diffOntologies(ontologyInput, ontologyOutput);
+
+        // If no differences, return an empty list
+        if (differences.isEmpty())
+            return Collections.emptyList();
+
+        // Generate error info based on the differences
+        XMLErrorReporter reporter = new XMLErrorReporter(Middleware.ontologyInput.getXmlData());
+        return reporter.generateErrorInfo(differences);
     }
 
     public Ontology getOntologyOutput() {
@@ -157,7 +192,8 @@ public class Middleware {
      * @param classes    list of classes
      * @param attributes list of attributes
      */
-    public void setNamespacesAndStructure(List<String> namespaces, List<String> structure, List<String> classes, List<String> attributes) {
+    public void setNamespacesAndStructure(List<String> namespaces, List<String> structure, List<String> classes,
+                                          List<String> attributes) {
         checkStructure.setNamespaces(namespaces);
         checkStructure.setStructure(structure);
         checkStructure.setClasses(classes);
@@ -170,11 +206,16 @@ public class Middleware {
      * @return true if the structure is successfully loaded, false otherwise
      */
     public boolean loadStructure() {
-        if (checkStructure.getStructure().isEmpty() || checkStructure.getAttributes().isEmpty() || checkStructure.getClasses().isEmpty()) {
+        if (checkStructure.getStructure().isEmpty() || checkStructure.getAttributes().isEmpty()
+                || checkStructure.getClasses().isEmpty()) {
             AppLogger.severe("Middleware: loadStructure: structure or classes or attributes is empty");
             return false;
         }
-        CDuceCodeLoader.loadCheckStructure(checkStructure.getNamespaces(), checkStructure.getStructure(), checkStructure.getAttributes(), checkStructure.getClasses());
+        CDuceCodeLoader.loadCheckStructure(
+                checkStructure.getNamespaces(),
+                checkStructure.getStructure(),
+                checkStructure.getAttributes(),
+                checkStructure.getClasses());
         return true;
     }
 
@@ -198,29 +239,8 @@ public class Middleware {
      */
     public void transformOntology() throws Exception {
         CDuceCommandExecutor executor = new CDuceCommandExecutor();
-        ontologyOutput = executor.transformOntology(ontologyInput);
-    }
-
-    public List<ErrorInfo> getErrors() throws Exception {
-        if (ontologyOutput == null || ontologyInput == null || ontologyOutput.isEmpty() || ontologyInput.isEmpty())
-            return Collections.emptyList();
-
-        XMLDiffChecker xmlDiffChecker = new XMLDiffChecker();
-        List<EditedElement> differences = xmlDiffChecker.diff(ontologyInput.getXmlData(), ontologyOutput.getXmlData());
-
-        List<ErrorInfo> errorList = new ArrayList<>();
-
-        for (EditedElement diff : differences) {
-            int startLine = diff.getStartLine();
-            int endLine = diff.getEndLine();
-            String errorMessage = "Difference between the two files.";
-            String elementDetails = diff.getId();
-
-            if (startLine != -1 && endLine != -1) {
-                errorList.add(new ErrorInfo(startLine, endLine, errorMessage, elementDetails));
-            }
-        }
-
-        return errorList;
+        ontologyOutput.setXmlData(executor.transformOntology(ontologyInput).getXmlData());
+        ontologyOutput.setOntologyName(ontologyInput.getOntologyName());
+        ontologyOutput.setOntologyExtension(ontologyInput.getOntologyExtension());
     }
 }
