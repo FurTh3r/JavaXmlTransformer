@@ -235,12 +235,27 @@ public class Middleware {
     }
 
     /**
-     * Transforms the ontology.
+     * Transforms the ontology using the CDuce command executor.
+     * <p>
+     * This method attempts to transform the input ontology using a CDuceCommandExecutor.
+     * If the transformation is successful,
+     * the method updates the output ontology with the transformed XML data,
+     * ontology name, and ontology extension.
+     * </p>
+     *
+     * @return {@code true} if the ontology was successfully transformed and the output ontology is updated;
+     *         {@code false} if the transformation failed or if the resulting content is {@code null}.
+     * @throws Exception if an error occurs during the transformation process.
      */
-    public void transformOntology() throws Exception {
+    public boolean transformOntology() throws Exception {
         CDuceCommandExecutor executor = new CDuceCommandExecutor();
-        ontologyOutput.setXmlData(executor.transformOntology(ontologyInput).getXmlData());
+        Ontology content = executor.transformOntology(ontologyInput);
+        if (content == null)
+            return false;
+
+        ontologyOutput.setXmlData(content.getXmlData());
         ontologyOutput.setOntologyName(ontologyInput.getOntologyName());
         ontologyOutput.setOntologyExtension(ontologyInput.getOntologyExtension());
+        return true;
     }
 }

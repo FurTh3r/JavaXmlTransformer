@@ -102,7 +102,7 @@ public class CDuceCommandExecutor implements CDuceCommandExecutorInterface {
      */
     private boolean parseVerificationOutput(String output) throws Exception {
         if (output.contains("LOADED\nVALID ONTOLOGY\n")) return true; // Valid ontology
-        else if (output.contains("LOADED\nINVALID ONTOLOGY\n") || output.contains("SYNTAX ERROR\nVALID ONTOLOGY\n"))
+        else if (output.contains("LOADED\nINVALID ONTOLOGY\n") || output.contains("SYNTAX ERROR"))
             return false; // Invalid ontology or syntax error
         else throw new Exception("Unexpected output from CDuce verification: " + output); // Handle unexpected output
     }
@@ -119,7 +119,7 @@ public class CDuceCommandExecutor implements CDuceCommandExecutorInterface {
             Ontology result = new Ontology();
             result.loadXmlFromFile(dotenv.get("ONTOLOGY_OUTPUT_ABSOLUTE"));
             return result;
-        } else if (output.contains("LOADED") && output.contains("FAILED"))
+        } else if ((output.contains("LOADED") && output.contains("FAILED")) || output.contains("SYNTAX ERROR"))
             return null; // Invalid ontology or transformation failure
         else throw new Exception("Unexpected output from CDuce transformation: " + output);
     }

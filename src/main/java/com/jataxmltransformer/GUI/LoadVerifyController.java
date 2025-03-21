@@ -1,104 +1,215 @@
 package com.jataxmltransformer.GUI;
 
-import javafx.event.ActionEvent;
+import com.jataxmltransformer.logic.data.EditedElement;
+import com.jataxmltransformer.logic.data.ErrorInfo;
+import com.jataxmltransformer.logic.data.Ontology;
+import com.jataxmltransformer.logic.utilities.MyPair;
+import com.jataxmltransformer.logic.xml.XMLDiffChecker;
+import com.jataxmltransformer.logic.xml.XMLFormatter;
+import com.jataxmltransformer.logs.AppLogger;
+import com.jataxmltransformer.middleware.Middleware;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.input.MouseEvent;
+import javafx.stage.FileChooser;
 import javafx.stage.Popup;
-import javafx.stage.Stage;
 
+import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 public class LoadVerifyController {
 
+    List<ErrorInfo> errors = new ArrayList<>();
     @FXML
     private ListView<HBox> ontologyListView; // ListView to display ontology lines with buttons
     @FXML
     private Label statusLabel;
-
-    private List<String> ontologyLines = new ArrayList<>();
+    private List<String> ontologyLines;
+    private List<String> ontologyBackup;
+    private Ontology ontologyData;
 
     @FXML
     public void initialize() {
-        // Initialize UI components if needed
+        ontologyLines = new ArrayList<>();
+        ontologyData = new Ontology();
+        ontologyBackup = new ArrayList<>();
     }
 
     @FXML
     private void loadOntologyFile() {
-        // Simulate loading an ontology file
-        String ontologyContent = "<root>\n    <validTag>Valid Content</validTag>\n    <invalidTag>Invalid Content</invalidTag>\n</root>";
-        ontologyLines = List.of(ontologyContent.split("\\n"));
-        highlightErrors();
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("XML File", "*.xml", "*.rdf", "*.owl"));
+
+        File file = fileChooser.showOpenDialog(null);
+        if (file != null) {
+            try {
+                ontologyData.loadXmlFromFile(file.getAbsolutePath());
+            } catch (IOException e) {
+                AppLogger.severe(e.getMessage());
+                // TODO error ?
+            }
+            ontologyData.setOntologyName(file.getName().replace(".xml", "").replace(".rdf", "").replace(".owl", ""));
+            ontologyData.setOntologyExtension(file.getName().substring(file.getName().lastIndexOf(".") + 1));
+
+            if (ontologyData.getXmlData() != null && !ontologyData.getXmlData().isEmpty()) {
+                ontologyLines = new ArrayList<>(List.of(ontologyData.getXmlData().split("\\n")));
+                highlightErrors(new ArrayList<>());
+            } else {
+                AppLogger.severe("Ontology file is empty or could not be loaded.");
+            }
+
+            Middleware.getInstance().setOntologyInput(ontologyData);
+        } else {
+            AppLogger.severe("Ontology file is null");
+        }
     }
 
     @FXML
     private void verifyFile() {
-        // Placeholder for validation logic
-        statusLabel.setText("Verification complete.");
+        try {
+            StringBuilder data = new StringBuilder();
+            for (String line : ontologyLines) {
+                data.append(line).append("\n");
+            }
+            ontologyData.setXmlData(data.toString());
+
+            Middleware.getInstance().setOntologyInput(ontologyData);
+
+            statusLabel.setText("Verification started...");
+            if (!Middleware.getInstance().loadStructure())
+                throw new Exception("Failed to load structure");
+
+            // Testing if ontology has to be transformed
+            boolean result = Middleware.getInstance().verifyOntology();
+
+            // Clear backup before transforming
+            ontologyBackup.clear();
+            ontologyBackup.addAll(ontologyLines); // Backup the current state
+
+            // Transform ontology if not valid
+            if (result)
+                statusLabel.setText("Ontology is valid.");
+            else {
+                statusLabel.setText("Ontology is not valid.");
+
+                // Transforming ontology
+                if (!Middleware.getInstance().transformOntology())
+                    statusLabel.setText("There is a Syntax error in the Ontology loaded!");
+                List<ErrorInfo> errors = Middleware.getErrors();
+                highlightErrors(errors);
+            }
+        } catch (Exception e) {
+            AppLogger.severe(e.getMessage());
+            statusLabel.setText(e.getMessage());
+        }
     }
 
     @FXML
-    public void highlightErrors() {
-        ontologyListView.getItems().clear(); // Clear previous content
+    public void highlightErrors(List<ErrorInfo> errorList) {
+        ontologyListView.getItems().clear(); // Clear the ListView
 
-        // Loop through lines and display them in the ListView
+        List<Integer> processedLines = new ArrayList<>();
+
         for (int i = 0; i < ontologyLines.size(); i++) {
-            String line = ontologyLines.get(i);
-            HBox hbox = new HBox(10);
-            Label lineLabel = new Label(line);
-
-            if (line.contains("invalidTag")) {
-                lineLabel.setStyle("-fx-text-fill: red;"); // Highlight error line in red
-                Button errorButton = new Button("Fix");
-                int finalI = i;
-                errorButton.setOnAction(e -> openDiffDialog(finalI, line)); // Fix button for the error line
-                hbox.getChildren().addAll(lineLabel, errorButton);
-            } else {
-                hbox.getChildren().add(lineLabel);
+            if (processedLines.contains(i)) {
+                continue; // Skip lines that were already grouped into a block
             }
 
-            ontologyListView.getItems().add(hbox); // Add the HBox (line + button) to the ListView
+            String line = ontologyLines.get(i);
+            HBox hbox = new HBox(10);
+            VBox block = new VBox();
+            Label lineLabel = new Label(line);
+
+            boolean isErrorBlock = false;
+            String errorMessage = "";
+            String errorDetails = "";
+            int blockStart = i, blockEnd = i;
+
+            // Check if this line starts an error block
+            for (ErrorInfo error : errorList) {
+                if (i >= (error.startLine() - 1) && i <= (error.endLine() - 1)) {
+                    isErrorBlock = true;
+                    errorMessage = error.errorMessage();
+                    errorDetails = error.elementDetails();
+                    blockStart = error.startLine() - 1;
+                    blockEnd = error.endLine() - 1;
+                    break;
+                }
+            }
+
+            // Collect all lines in this error block
+            for (int j = blockStart; j <= blockEnd; j++) {
+                if (j < ontologyLines.size()) {
+                    block.getChildren().add(new Label(ontologyLines.get(j)));
+                    processedLines.add(j);
+                }
+            }
+
+            if (isErrorBlock) {
+                block.setStyle("-fx-background-color: rgba(255, 0, 0, 0.2); -fx-padding: 5; -fx-border-color: red;");
+                Button errorButton = new Button("Fix");
+                int finalStart = blockStart;
+                int finalEnd = blockEnd;
+                String finalErrorMessage = errorMessage;
+                String finalErrorDetails = errorDetails;
+
+                errorButton.setOnAction(e -> openDiffDialog(finalStart, finalEnd, finalErrorMessage, finalErrorDetails));
+                hbox.getChildren().addAll(block, errorButton);
+            } else {
+                hbox.getChildren().add(block);
+            }
+
+            ontologyListView.getItems().add(hbox);
         }
     }
 
-    private void openDiffDialog(int lineIndex, String errorText) {
-        // Create a new Popup
+    private void openDiffDialog(int startLineIndex, int endLineIndex, String errorMessage, String errorDetails) {
         Popup popup = new Popup();
-
-        // Load the FXML layout for the popup
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/GUI/Popup_layout.fxml"));
+
         try {
-            VBox popupContent = loader.load(); // Load the content from FXML
-            popup.getContent().add(popupContent); // Add the loaded content to the popup
+            VBox popupContent = loader.load();
+            popup.getContent().add(popupContent);
         } catch (IOException e) {
-            e.printStackTrace(); // Handle the exception if FXML loading fails
+            AppLogger.severe("Error loading popup layout: " + e.getMessage());
             return;
         }
 
-        // Get the controller from the FXML loader and set the context
         PopupController controller = loader.getController();
-        controller.setPopupContext(lineIndex, errorText, popup, this); // Set line index and parent controller
+        String blockText = String.join("\n", ontologyLines.subList(startLineIndex, Math.min(endLineIndex + 1, ontologyLines.size())));
+        controller.setPopupContext(startLineIndex, endLineIndex, blockText, errorMessage, errorDetails, popup, this);
 
-        // Get the HBox containing the button to determine the correct position of the popup
-        HBox sourceHBox = ontologyListView.getItems().get(lineIndex); // Get the corresponding HBox for the line
-        Button sourceButton = (Button) sourceHBox.getChildren().get(1); // Get the button in the HBox (assumed to be the second child)
+        // Positioning near the first line of the block
+        if (startLineIndex >= ontologyListView.getItems().size()) {
+            AppLogger.severe("Invalid block index for popup: " + startLineIndex);
+            return;
+        }
 
-        // Get the position of the error button in screen coordinates
+        HBox sourceHBox = ontologyListView.getItems().get(startLineIndex);
+        Button sourceButton = (Button) sourceHBox.getChildren().get(1);
+
         double x = sourceButton.localToScreen(sourceButton.getBoundsInLocal()).getMinX();
         double y = sourceButton.localToScreen(sourceButton.getBoundsInLocal()).getMinY();
 
-        // Position the popup relative to the button and show it
         popup.setAnchorX(x);
         popup.setAnchorY(y);
         popup.show(sourceButton, x, y);
     }
 
     public List<String> getOntologyLines() {
-        return ontologyLines;
+        return new ArrayList<>(ontologyLines);
+    }
+
+    public void setOntologyLines(List<String> ontologyLines) {
+        this.ontologyLines.clear();
+        // Restore lines from MyPair list
+        // Only add the string part
+        this.ontologyLines.addAll(ontologyLines);
     }
 }
