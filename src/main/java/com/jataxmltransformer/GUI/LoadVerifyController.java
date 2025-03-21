@@ -8,6 +8,7 @@ import com.jataxmltransformer.logic.xml.XMLDiffChecker;
 import com.jataxmltransformer.logic.xml.XMLFormatter;
 import com.jataxmltransformer.logs.AppLogger;
 import com.jataxmltransformer.middleware.Middleware;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
@@ -211,5 +212,13 @@ public class LoadVerifyController {
         // Restore lines from MyPair list
         // Only add the string part
         this.ontologyLines.addAll(ontologyLines);
+    }
+
+    @FXML
+    private void clearAll() {
+        this.ontologyLines.clear();
+        this.ontologyListView.getItems().clear();
+        this.ontologyBackup.clear();
+        Middleware.getInstance().setOntologyInput(null);
     }
 }
