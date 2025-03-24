@@ -8,16 +8,18 @@
         <Label text="Struttura"/>
         <ListView fx:id="structureListView" editable="true" prefHeight="150" prefWidth="300"/>
         <HBox spacing="10">
-            <Button text="Aggiungi" onAction="#addStructureLine"/>
-            <Button text="Rimuovi" onAction="#removeStructureLine"/>
+            <Button text="Add" onAction="#addStructureLine"/>
+            <Button text="Remove" onAction="#removeStructureLine"/>
+            <Button text="Clear All" onAction="#clearAllStructure"/>
         </HBox>
 
         <Label text="Classi e Attributi"/>
         <ListView fx:id="classAttributesListView" editable="true" prefHeight="150" prefWidth="300"/>
         <HBox spacing="10">
             <ComboBox fx:id="typeOfElement"/>
-            <Button text="Aggiungi" onAction="#addClassAttributeLine"/>
-            <Button text="Rimuovi" onAction="#removeClassAttributeLine"/>
+            <Button text="Add" onAction="#addClassAttributeLine"/>
+            <Button text="Remove" onAction="#removeClassAttributeLine"/>
+            <Button text="Clear All" onAction="#clearAllClassAttribute"/>
         </HBox>
 
         <HBox spacing="10">

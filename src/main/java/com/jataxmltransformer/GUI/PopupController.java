@@ -1,110 +1,130 @@
 package com.jataxmltransformer.GUI;
 
+import com.jataxmltransformer.logs.AppLogger;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
-import javafx.scene.layout.VBox;
 import javafx.stage.Popup;
 
-import java.io.IOException;
 import java.util.List;
 
+/**
+ * Controller class for handling the popup window that allows users
+ * to edit or remove erroneous lines detected in the ontology file.
+ */
 public class PopupController {
 
-    @FXML private TextArea originalText;
-    @FXML private TextArea editedText;
-    @FXML private Label errorMessageLabel; // Label per mostrare il messaggio di errore
-    @FXML private Button saveButton;
-    @FXML private Button cancelButton;
-    @FXML private Button removeButton;
+    @FXML
+    private TextArea originalText; // Displays the original text with the error
+    @FXML
+    private TextArea editedText; // Editable field for correcting the error
+    @FXML
+    private Label errorMessageLabel; // Label to display the error message
+    @FXML
+    private Button saveButton; // Button to save changes
+    @FXML
+    private Button cancelButton; // Button to cancel changes
+    @FXML
+    private Button removeButton; // Button to remove the erroneous line(s)
 
-    private int lineIndex;
-    private int endIndex;
-    private Popup popup;
-    private LoadVerifyController parentController;
+    private int lineIndex; // The index of the erroneous line
+    private int endIndex; // The end index if the error spans multiple lines
+    private Popup popup; // Reference to the popup window
+    private LoadVerifyController parentController; // Reference to the parent controller
 
-    // Metodo di inizializzazione per impostare gli eventi dei pulsanti
+    /**
+     * Initializes the controller and sets event handlers for buttons.
+     */
     @FXML
     public void initialize() {
-        System.out.println("PopupController initialized.");
-        if (errorMessageLabel == null) {
-            System.err.println("errorMessageLabel is null! Check FXML file.");
-        }
-        saveButton.setOnAction(e -> saveChanges());
-        cancelButton.setOnAction(e -> cancelChanges());
-        removeButton.setOnAction(e -> removeLine());
+        AppLogger.info("PopupController initialized.");
+        if (errorMessageLabel == null)
+            AppLogger.severe("errorMessageLabel is null! Check FXML file.");
+
+        saveButton.setOnAction(_ -> saveChanges());
+        cancelButton.setOnAction(_ -> cancelChanges());
+        removeButton.setOnAction(_ -> removeLine());
     }
 
-    // Metodo per configurare il popup con informazioni dettagliate
-    public void setPopupContext(int lineIndex, int endIndex, String errorText, String errorMessage, String errorDetails, Popup popup, LoadVerifyController parentController) {
+    /**
+     * Configures the popup with necessary details about the error.
+     *
+     * @param lineIndex        The index of the erroneous line.
+     * @param endIndex         The end index if the error spans multiple lines.
+     * @param errorText        The text containing the error.
+     * @param errorMessage     The brief error message.
+     * @param errorDetails     Detailed information about the error.
+     * @param popup            The popup window reference.
+     * @param parentController The parent controller handling ontology verification.
+     */
+    public void setPopupContext(int lineIndex, int endIndex, String errorText, String errorMessage,
+                                String errorDetails, Popup popup, LoadVerifyController parentController) {
         this.lineIndex = lineIndex;
         this.endIndex = endIndex;
         this.popup = popup;
         this.parentController = parentController;
 
-        originalText.setText(errorText); // Testo originale con l'errore
-        editedText.setText(errorText);   // Inizializza il campo modificabile con lo stesso testo
+        originalText.setText(errorText); // Set the original text
+        editedText.setText(errorText);   // Initialize editable field with the same text
 
-        // Controllo per evitare il NullPointerException
-        if (errorMessageLabel != null) {
-            errorMessageLabel.setText("Errore: " + errorMessage + "\nDettagli: " + errorDetails);
-        } else {
-            System.err.println("errorMessageLabel is null inside setPopupContext!");
-        }
+        // Prevent NullPointerException when setting the error message label
+        if (errorMessageLabel != null)
+            errorMessageLabel.setText("Error: " + errorMessage + "\nDetails: " + errorDetails);
+        else
+            AppLogger.severe("errorMessageLabel is null inside setPopupContext!");
     }
 
-    // Metodo per salvare le modifiche alla riga
+    /**
+     * Saves the changes made to the erroneous line(s) and updates the ontology file.
+     */
     private void saveChanges() {
-        if (lineIndex < 0 || lineIndex >= parentController.getOntologyLines().size()) {
+        if (lineIndex < 0 || lineIndex >= parentController.getOntologyLines().size())
             return;
-        }
 
-        // Get the current lines
-        List<String> ontologyLines = parentController.getOntologyLines();
+        List<String> ontologyLines = parentController.getOntologyLines(); // Get current lines
 
-        // Get the modified text from the editedText field, split by newlines
-        String[] text = editedText.getText().split("\n");
+        String[] text = editedText.getText().split("\n"); // Get modified text
 
-        // Remove the lines from lineIndex to endIndex (inclusive)
+        // Remove the erroneous lines from the ontology list
         ontologyLines.subList(lineIndex, endIndex + 1).clear();
 
-        // Insert the new lines at the starting index (lineIndex)
-        for (int i = 0; i < text.length; i++) {
+        // Insert the corrected lines at the original position
+        for (int i = 0; i < text.length; i++)
             ontologyLines.add(lineIndex + i, text[i]);
-        }
 
-        // Update the ontology lines in the parent controller
+        // Update ontology lines in the parent controller
         parentController.setOntologyLines(ontologyLines);
 
-        // Refresh the ListView with the updated data
-        parentController.highlightErrors(parentController.errors);
-        popup.hide();
+        // Refresh the ListView to reflect changes
+        parentController.highlightErrors(parentController.getErrors());
+        popup.hide(); // Close the popup
     }
 
-    // Metodo per annullare le modifiche e chiudere il popup
+    /**
+     * Cancels any modifications and closes the popup without making changes.
+     */
     private void cancelChanges() {
         popup.hide();
     }
 
-    // Metodo per rimuovere la riga con l'errore
+    /**
+     * Removes the erroneous line(s) from the ontology file.
+     */
     private void removeLine() {
-        if (lineIndex < 0 || lineIndex >= parentController.getOntologyLines().size()) {
+        if (lineIndex < 0 || lineIndex >= parentController.getOntologyLines().size())
             return;
-        }
 
-        // Get the current lines
-        List<String> ontologyLines = parentController.getOntologyLines();
+        List<String> ontologyLines = parentController.getOntologyLines(); // Get current lines
 
-        // Remove the lines in the range from lineIndex to endIndex
+        // Remove the lines within the specified range
         ontologyLines.subList(lineIndex, endIndex + 1).clear();
 
-        // Update the ontology lines in the parent controller
+        // Update ontology lines in the parent controller
         parentController.setOntologyLines(ontologyLines);
 
-        // Refresh the ListView with the updated data
-        parentController.highlightErrors(parentController.errors);
-        popup.hide();
+        // Refresh the ListView to reflect changes
+        parentController.highlightErrors(parentController.getErrors());
+        popup.hide(); // Close the popup
     }
 }

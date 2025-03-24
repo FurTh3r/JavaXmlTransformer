@@ -90,7 +90,8 @@ public class CheckStructure {
      * @param namespaces The new list of namespaces.
      */
     public void setNamespaces(List<String> namespaces) {
-        this.namespaces = namespaces;
+        this.namespaces = new ArrayList<>(getDefaultNamespaces());
+        this.namespaces.addAll(namespaces);
     }
 
     /**

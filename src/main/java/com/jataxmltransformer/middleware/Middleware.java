@@ -25,7 +25,7 @@ public class Middleware {
     private static Ontology ontologyOutput;
 
     /**
-     * Private constructor to enforce singleton pattern.
+     * Private constructor to enforce a singleton pattern.
      */
     private Middleware() {
         checkStructure = new CheckStructure();
@@ -244,7 +244,7 @@ public class Middleware {
      * </p>
      *
      * @return {@code true} if the ontology was successfully transformed and the output ontology is updated;
-     *         {@code false} if the transformation failed or if the resulting content is {@code null}.
+     * {@code false} if the transformation failed or if the resulting content is {@code null}.
      * @throws Exception if an error occurs during the transformation process.
      */
     public boolean transformOntology() throws Exception {
@@ -257,5 +257,14 @@ public class Middleware {
         ontologyOutput.setOntologyName(ontologyInput.getOntologyName());
         ontologyOutput.setOntologyExtension(ontologyInput.getOntologyExtension());
         return true;
+    }
+
+    /**
+     * Returns a list of default namespaces commonly used in RDF and OWL structures.
+     *
+     * @return A list of predefined namespace declarations.
+     */
+    public List<String> getDefaultNamespaces() {
+        return checkStructure.getDefaultNamespaces();
     }
 }

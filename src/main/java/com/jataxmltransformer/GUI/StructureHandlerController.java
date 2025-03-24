@@ -23,6 +23,7 @@ import java.util.List;
  * Handles UI interactions for defining structures, attributes, and saving/loading them.
  */
 public class StructureHandlerController {
+
     @FXML
     private ListView<String> structureListView;
     @FXML
@@ -35,6 +36,8 @@ public class StructureHandlerController {
 
     /**
      * Initializes UI components and sets up editing capabilities.
+     * Configures the structure and class attributes list views and populates
+     * the ComboBox with predefined structure element types.
      */
     @FXML
     public void initialize() {
@@ -45,6 +48,8 @@ public class StructureHandlerController {
 
     /**
      * Configures the class attributes list to allow in-place editing.
+     * Sets up how the list displays class and attribute pairs and handles
+     * editing events to update the underlying data.
      */
     private void setupClassAttributesEditing() {
         classAttributesListView.setEditable(true);
@@ -68,6 +73,7 @@ public class StructureHandlerController {
 
     /**
      * Configures the structure list to allow in-place editing.
+     * Handles the editing of structure lines and updates the structure list in memory.
      */
     private void setupStructureEditing() {
         structureListView.setEditable(true);
@@ -89,7 +95,8 @@ public class StructureHandlerController {
     }
 
     /**
-     * Populates the structure type ComboBox with predefined options.
+     * Populates the structure type ComboBox with predefined options ("Class", "Attribute").
+     * This allows the user to select the type of structure element (class or attribute).
      */
     private void setupStructureTypeOptions() {
         ObservableList<String> structureTypes = FXCollections.observableArrayList("Class", "Attribute");
@@ -98,7 +105,8 @@ public class StructureHandlerController {
     }
 
     /**
-     * Updates class and attribute lists in Middleware.
+     * Updates class and attribute lists in the Middleware instance.
+     * The lists are cleared and repopulated with the current class and attribute data.
      */
     private void updateClassAttributes() {
         Middleware middleware = Middleware.getInstance();
@@ -111,7 +119,8 @@ public class StructureHandlerController {
     }
 
     /**
-     * Updates the structure list in Middleware.
+     * Updates the structure list in the Middleware instance.
+     * The list of structures is cleared and repopulated with the current structure data.
      */
     private void updateStructure() {
         Middleware middleware = Middleware.getInstance();
@@ -120,7 +129,8 @@ public class StructureHandlerController {
     }
 
     /**
-     * Adds a new line to the structure list.
+     * Adds a new line to the structure list with a default name.
+     * The new line is also added to the structure data in Middleware.
      */
     @FXML
     private void addStructureLine() {
@@ -131,6 +141,7 @@ public class StructureHandlerController {
 
     /**
      * Removes the selected line from the structure list.
+     * The removed line is also deleted from the structure data in Middleware.
      */
     @FXML
     private void removeStructureLine() {
@@ -142,7 +153,10 @@ public class StructureHandlerController {
     }
 
     /**
-     * Adds a new class or attribute line to the list.
+     * Adds a new class or attribute line to the list, based on the type selected
+     * in the ComboBox.
+     * The new element is also added to the corresponding class or
+     * attribute list in Middleware.
      */
     @FXML
     private void addClassAttributeLine() {
@@ -156,6 +170,8 @@ public class StructureHandlerController {
 
     /**
      * Removes the selected class or attribute line from the list.
+     * The removed element is also deleted from the corresponding class or
+     * attribute list in Middleware.
      */
     @FXML
     private void removeClassAttributeLine() {
@@ -169,7 +185,9 @@ public class StructureHandlerController {
     }
 
     /**
-     * Loads a structure from a JSON file and updates UI components.
+     * Loads a structure from a JSON file and updates UI components accordingly.
+     * The file content is parsed, and the structure, classes, and attributes are
+     * updated in the Middleware instance.
      */
     @FXML
     private void loadStructure() {
@@ -206,7 +224,8 @@ public class StructureHandlerController {
     }
 
     /**
-     * Saves a structure to a JSON file.
+     * Saves the current structure to a JSON file.
+     * The structure, classes, and attributes are written to the file in a formatted JSON structure.
      */
     @FXML
     private void saveStructure() {
@@ -220,5 +239,24 @@ public class StructureHandlerController {
             // Pretty print JSON
             FileHandler.saveFile("JSON File", "*.json", JSONContent.toString(4));
         }
+    }
+
+    /**
+     * Clears all class and attribute data from the lists and the Middleware instance.
+     */
+    @FXML
+    private void clearAllClassAttribute() {
+        Middleware.getInstance().getClasses().clear();
+        Middleware.getInstance().getAttributes().clear();
+        classAttributesListView.getItems().clear();
+    }
+
+    /**
+     * Clears all structure data from the list and the Middleware instance.
+     */
+    @FXML
+    private void clearAllStructure() {
+        Middleware.getInstance().getStructure().clear();
+        structureListView.getItems().clear();
     }
 }
