@@ -45,6 +45,17 @@ public class PopupController {
         saveButton.setOnAction(_ -> saveChanges());
         cancelButton.setOnAction(_ -> cancelChanges());
         removeButton.setOnAction(_ -> removeLine());
+
+        // Synchronize scrolling between the two TextAreas
+        synchronizeScrolling();
+    }
+
+    /**
+     * Synchronizes the scrolling of the two TextAreas.
+     */
+    private void synchronizeScrolling() {
+        originalText.scrollTopProperty().bindBidirectional(editedText.scrollTopProperty());
+        originalText.scrollLeftProperty().bindBidirectional(editedText.scrollLeftProperty());
     }
 
     /**

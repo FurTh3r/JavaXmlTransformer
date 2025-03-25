@@ -65,7 +65,7 @@ public class NamespacesHandlerController {
                 } else {
                     setText(item);
                     if (defaultNamespaces.contains(item)) {
-                        setStyle("-fx-text-fill: blue; -fx-font-weight: bold;"); // Blue text for default
+                        setStyle("-fx-font-weight: bold;");
                         setEditable(false); // Ensure it's non-editable
                     } else
                         setStyle(""); // Normal styling for user-added namespaces
@@ -74,9 +74,8 @@ public class NamespacesHandlerController {
 
             @Override
             public void startEdit() {
-                if (defaultNamespaces.contains(getItem())) {
+                if (defaultNamespaces.contains(getItem()))
                     return; // Prevent editing default namespaces
-                }
                 super.startEdit();
             }
         });
@@ -158,7 +157,7 @@ public class NamespacesHandlerController {
             Middleware.getInstance().setNamespaces(userNamespaces);
 
         } catch (JSONException e) {
-            CustomAlert.showError("Error while reading file.", "Error while reading file: " + e.getMessage());
+            CustomAlert.showError("Error while reading file.", "Invalid JSON format");
             AppLogger.severe("Error while reading file: " + e.getMessage());
         }
     }
@@ -182,14 +181,22 @@ public class NamespacesHandlerController {
      */
     @FXML
     private void saveNamespaces() {
-        JSONArray JSONContent = new JSONArray();
-        userNamespaces.forEach(namespace -> {
-            JSONObject obj = new JSONObject();
-            obj.put("namespace", namespace);
-            JSONContent.put(obj);
-        });
+        if (!userNamespaces.isEmpty()) {
+            JSONArray JSONContent = new JSONArray();
+            userNamespaces.forEach(namespace -> {
+                JSONObject obj = new JSONObject();
+                obj.put("namespace", namespace);
+                JSONContent.put(obj);
+            });
 
-        FileHandler.saveFile("JSON File", "*.json", JSONContent);
+            FileHandler.saveFile("JSON File", "*.json", JSONContent);
+        }
+        else {
+            CustomAlert.showError("No data to save", """
+                    No data to save:
+                    Please add at least one namespace.""");
+            AppLogger.severe("No data to save");
+        }
     }
 
     /**

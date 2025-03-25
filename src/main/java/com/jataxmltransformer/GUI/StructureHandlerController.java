@@ -7,14 +7,21 @@ import com.jataxmltransformer.middleware.Middleware;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.cell.TextFieldListCell;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.util.StringConverter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Label;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,22 +60,7 @@ public class StructureHandlerController {
      */
     private void setupClassAttributesEditing() {
         classAttributesListView.setEditable(true);
-        classAttributesListView.setCellFactory(TextFieldListCell.forListView(new StringConverter<>() {
-            @Override
-            public String toString(MyPair<String, String> object) {
-                return object.getFirst() + " - " + object.getSecond();
-            }
-
-            @Override
-            public MyPair<String, String> fromString(String string) {
-                String[] parts = string.split("-");
-                return new MyPair<>(parts[0].trim(), parts[1].trim());
-            }
-        }));
-        classAttributesListView.setOnEditCommit(event -> {
-            classAttributesListView.getItems().set(event.getIndex(), event.getNewValue());
-            updateClassAttributes();
-        });
+        classAttributesListView.setCellFactory(_ -> new ClassAttributeCell());
     }
 
     /**
@@ -239,6 +231,12 @@ public class StructureHandlerController {
             // Pretty print JSON
             FileHandler.saveFile("JSON File", "*.json", JSONContent.toString(4));
         }
+        else {
+            CustomAlert.showError("No data to save", """
+                    No data to save:
+                    Please add at least one structure line, class, or attribute.""");
+            AppLogger.severe("No data to save");
+        }
     }
 
     /**
@@ -258,5 +256,102 @@ public class StructureHandlerController {
     private void clearAllStructure() {
         Middleware.getInstance().getStructure().clear();
         structureListView.getItems().clear();
+    }
+
+    public static class ClassAttributeCell extends ListCell<MyPair<String, String>> {
+        private final HBox hBox = new HBox();
+        private final TextField textField = new TextField();
+        private final Label typeLabel = new Label();
+
+        public ClassAttributeCell() {
+            textField.setPromptText("Enter name");
+
+            // Remove border and reduce height
+            textField.setStyle("-fx-background-color: transparent; " +
+                    "-fx-border-color: transparent; " +
+                    "-fx-padding: 2px 5px; " +
+                    "-fx-font-size: 12px;");
+
+            typeLabel.setStyle("-fx-padding: 0 10px; -fx-font-weight: bold;");
+
+            HBox.setHgrow(textField, Priority.ALWAYS);
+            hBox.setSpacing(5);
+            hBox.setAlignment(Pos.CENTER_LEFT); // Align items vertically
+
+            // Push typeLabel to the right
+            HBox spacer = new HBox();
+            HBox.setHgrow(spacer, Priority.ALWAYS);
+
+            hBox.getChildren().addAll(textField, spacer, typeLabel);
+
+            // Commit text on Enter or loss of focus
+            textField.setOnAction(event -> commitEdit(new MyPair<>(textField.getText(), getItem().getSecond())));
+            textField.focusedProperty().addListener((_, _, newVal) -> {
+                if (!newVal && isEditing()) commitEdit(new MyPair<>(textField.getText(), getItem().getSecond()));
+            });
+
+            // Enable editing only on double click
+            setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && !isEmpty()) {
+                    startEdit();
+                }
+            });
+        }
+
+        @Override
+        protected void updateItem(MyPair<String, String> item, boolean empty) {
+            super.updateItem(item, empty);
+            if (empty || item == null) {
+                setGraphic(null);
+            } else {
+                if (isEditing()) {
+                    textField.setText(item.getFirst());
+                    setGraphic(hBox);
+                } else {
+                    HBox displayBox = new HBox(new Label(item.getFirst()), new Label("  "), typeLabel);
+                    HBox.setHgrow(displayBox, Priority.ALWAYS);
+                    displayBox.setAlignment(Pos.CENTER_LEFT);
+
+                    // Push typeLabel to the right
+                    HBox spacer = new HBox();
+                    HBox.setHgrow(spacer, Priority.ALWAYS);
+                    displayBox.getChildren().add(1, spacer);
+
+                    setGraphic(displayBox);
+                }
+                typeLabel.setText(item.getSecond());
+            }
+        }
+
+        @Override
+        public void startEdit() {
+            if (!isEmpty()) {
+                super.startEdit();
+                textField.setText(getItem().getFirst());
+                setGraphic(hBox);
+                textField.requestFocus();
+            }
+        }
+
+        @Override
+        public void cancelEdit() {
+            super.cancelEdit();
+            setGraphic(getDisplayBox(getItem()));
+        }
+
+        @Override
+        public void commitEdit(MyPair<String, String> newValue) {
+            super.commitEdit(newValue);
+            setGraphic(getDisplayBox(newValue));
+        }
+
+        private HBox getDisplayBox(MyPair<String, String> item) {
+            Label nameLabel = new Label(item.getFirst());
+            HBox spacer = new HBox();
+            HBox.setHgrow(spacer, Priority.ALWAYS);
+            HBox box = new HBox(nameLabel, spacer, typeLabel);
+            box.setAlignment(Pos.CENTER_LEFT);
+            return box;
+        }
     }
 }

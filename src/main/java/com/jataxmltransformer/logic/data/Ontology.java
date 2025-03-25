@@ -1,5 +1,7 @@
 package com.jataxmltransformer.logic.data;
 
+import com.jataxmltransformer.logic.xml.XMLFormatter;
+
 import java.io.*;
 
 /**

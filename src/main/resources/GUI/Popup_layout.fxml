@@ -3,22 +3,31 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-
 <VBox xmlns:fx="http://javafx.com/fxml" fx:controller="com.jataxmltransformer.GUI.PopupController" spacing="10"
       stylesheets="@styles.css" styleClass="popup">
+
     <!-- Use TextArea for multiple lines of text -->
     <HBox spacing="10">
-        <TextArea fx:id="originalText" editable="false" prefWidth="300" wrapText="true"/>
-        <TextArea fx:id="editedText" prefWidth="300" wrapText="true"/>
+        <VBox>
+            <!-- Label for the first TextArea (Original Code) -->
+            <Label text="Original Code (Not Edited)" styleClass="title-label"/>
+            <TextArea fx:id="originalText" editable="false" prefWidth="300" prefHeight="400" wrapText="true"/>
+        </VBox>
+
+        <VBox>
+            <!-- Label for the second TextArea (Editable Code) -->
+            <Label text="Editable Code" styleClass="title-label"/>
+            <TextArea fx:id="editedText" prefWidth="300" prefHeight="400" wrapText="true"/>
+        </VBox>
     </HBox>
 
     <!-- Buttons for saving, canceling, and removing lines -->
-    <HBox spacing="10">
-        <Button text="Save" fx:id="saveButton"/>
-        <Button text="Cancel" fx:id="cancelButton"/>
-        <Button text="Remove Line" fx:id="removeButton"/>
+    <HBox spacing="10" alignment="center">
+        <Button text="Save" fx:id="saveButton" styleClass="button-blue"/>
+        <Button text="Cancel" fx:id="cancelButton" styleClass="button-clear"/>
+        <Button text="Remove Line" fx:id="removeButton" styleClass="button-remove"/>
     </HBox>
 
     <!-- Error message label -->
-    <Label fx:id="errorMessageLabel"/>
+    <Label fx:id="errorMessageLabel" alignment="center" styleClass="error-message"/>
 </VBox>

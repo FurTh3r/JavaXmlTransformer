@@ -1,112 +1,266 @@
-/* Generale */
+/* General Styling */
 .root {
-    -fx-background-color: #f0f8ff; /* Azzurrino chiaro */
-    -fx-font-family: "Arial";
+    -fx-background-color: linear-gradient(to bottom, #e0f7fa, #ffffff); /* Subtle gradient from light cyan to white */
+    -fx-font-family: "Segoe UI", Arial, sans-serif;
 }
 
 /* TabPane */
 .tab-pane {
     -fx-tab-min-width: 120px;
     -fx-tab-max-width: 200px;
-    -fx-background-color: white;
+    -fx-background-color: linear-gradient(to bottom, #e0f7fa, #ffffff);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.1), 5, 0, 0, 2); /* Add subtle shadow for depth */
 }
 
+.tab-pane:focused > .tab-header-area > .headers-region > .tab:selected .focus-indicator {
+    -fx-border-color: transparent;
+}
+
+.tab-pane .tab-header-area .tab-header-background {
+    -fx-background-color: transparent;
+}
+
+.tab-pane .tab-header-area .tab-header-background {
+    -fx-effect: null;
+}
+
+/* Tab style */
 .tab {
-    -fx-background-color: #d0e7ff; /* Azzurrino più scuro */
-    -fx-text-fill: white; /* Testo bianco */
+    -fx-background-color: #c9e4ff; /* Light blue */
+    -fx-text-fill: #2f3b4c; /* Darker text for contrast */
     -fx-font-weight: bold;
+    -fx-padding: 10px;
+    -fx-border-width: 0; /* Ensure no border around tabs */
+    -fx-background-insets: 0; /* Remove any inset background */
+    -fx-effect: none; /* Remove any inner shadow or effect */
 }
 
+/* Remove the focus border and the inner border of the selected tab */
 .tab:selected {
-    -fx-background-color: #a6d5ff; /* Azzurrino più intenso */
-    -fx-text-fill: white;
+    -fx-background-color: #6ab1f3; /* Light blue background when selected */
+    -fx-text-fill: white; /* White text for contrast */
+    -fx-border-width: 0; /* Ensure no border when selected */
 }
 
-/* Labels */
-.label {
-    -fx-font-size: 14px;
-    -fx-text-fill: #003366;
+/* Remove the focus effect on selected tab */
+.tab:selected:focused {
+    -fx-background-color: #6ab1f3; /* Same background color as the selected tab */
+    -fx-border-width: 0; /* Remove focus border */
+}
+
+/* Remove any border or background around the tab label */
+.tab .tab-label {
+    -fx-border-width: 0; /* Remove any border around the text */
+    -fx-background-color: transparent; /* Remove any background color */
+    -fx-text-fill: inherit; /* Use the inherited text color (e.g., white on selected tab) */
+}
+
+/* Remove focus outline from the tab */
+.tab:focused {
+    -fx-border-width: 0; /* Remove focus border */
 }
 
 /* ListView */
 .list-view {
-    -fx-background-color: #e6f2ff; /* Azzurrino chiaro */
-    -fx-border-color: #a6d5ff;
-    -fx-border-radius: 5;
+    -fx-background-color: #ffffff;
+    -fx-cell-background-color: #f1faff;
+    -fx-border-color: #c1d6ea;
+    -fx-border-radius: 8;
+    -fx-font-size: 14px;
 }
 
 /* TextArea */
 .text-area {
-    -fx-control-inner-background: white;
-    -fx-border-color: #a6d5ff;
-    -fx-border-radius: 5;
+    -fx-background-color: white;
+    -fx-border-color: #c1d6ea;
+    -fx-border-radius: 8;
+    -fx-padding: 10px;
 }
 
 /* TextField */
 .text-field {
     -fx-background-color: white;
-    -fx-border-color: #a6d5ff;
-    -fx-border-radius: 5;
+    -fx-border-color: #c1d6ea;
+    -fx-border-radius: 8;
+    -fx-padding: 8px;
 }
 
-/* Bottoni */
-.button {
-    -fx-background-color: #a6d5ff;
-    -fx-text-fill: white; /* Testo bianco */
+/* Button Styling for Add, Remove, and Clear All */
+.button-add {
+    -fx-background-color: #4CAF50; /* Green for Add */
+    -fx-text-fill: white;
     -fx-font-weight: bold;
-    -fx-border-radius: 5;
-    -fx-padding: 5 10;
+    -fx-border-radius: 8;
+    -fx-padding: 8 16;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
 }
 
-.button:hover {
-    -fx-background-color: #75b6f0;
+.button-add:hover {
+    -fx-background-color: #45a049;
+}
+
+.button-remove {
+    -fx-background-color: #f44336; /* Red for Remove */
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-border-radius: 8;
+    -fx-padding: 8 16;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+}
+
+.button-remove:hover {
+    -fx-background-color: #e53935;
+}
+
+.button-clear {
+    -fx-background-color: #9e9e9e; /* Gray for Clear All */
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-border-radius: 8;
+    -fx-padding: 8 16;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+}
+
+.button-clear:hover {
+    -fx-background-color: #757575;
+}
+
+.button-blue {
+    -fx-background-color: #1E88E5; /* Blue for Load and Save */
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-border-radius: 8;
+    -fx-padding: 8 16;
+    -fx-font-size: 14px;
+    -fx-cursor: hand;
+}
+
+.button-blue:hover {
+    -fx-background-color: #1976D2; /* Slightly darker blue on hover */
 }
 
 /* Popup Styling */
 .popup {
-    -fx-background-color: rgba(0, 0, 0, 0.7); /* Black background with transparency */
-    -fx-background-insets: 0;
-    -fx-background-radius: 10;
-    -fx-border-color: #a6d5ff; /* Border color to match existing theme */
-    -fx-border-radius: 10;
-    -fx-padding: 10;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 10, 0, 0, 2); /* Subtle shadow for the popup */
+    -fx-background-color: rgba(255, 255, 255, 0.9); /* Light, semi-transparent white for a cleaner look */
+    -fx-background-radius: 12;
+    -fx-border-color: #6ab1f3; /* Light blue border */
+    -fx-border-width: 2; /* Border to give the popup depth */
+    -fx-padding: 16;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.3), 10, 0, 0, 6); /* More prominent shadow for better visibility */
 }
 
 /* Popup TextField */
 .popup .text-field {
     -fx-background-color: white;
-    -fx-border-color: #a6d5ff;
-    -fx-border-radius: 5;
+    -fx-border-color: #c1d6ea;
+    -fx-border-radius: 8;
+    -fx-font-size: 14px;
 }
 
 /* Popup Button */
 .popup .button {
-    -fx-background-color: #a6d5ff;
-    -fx-text-fill: white; /* Text in white */
+    -fx-background-color: #6ab1f3; /* Light blue for buttons */
+    -fx-text-fill: white;
     -fx-font-weight: bold;
-    -fx-border-radius: 5;
-    -fx-padding: 5 10;
+    -fx-border-radius: 8;
+    -fx-padding: 8 16;
 }
 
 .popup .button:hover {
-    -fx-background-color: #75b6f0; /* Hover color */
+    -fx-background-color: #3991db; /* Darker blue on hover */
 }
 
-/* Popup VBox */
-.popup .vbox {
-    -fx-spacing: 10;
+/* Error Message Styling */
+.popup .error-message {
+    -fx-font-size: 10px; /* Smaller font size */
+    -fx-text-fill: #f44336; /* Red color for errors */
+    -fx-font-weight: bold;
+    -fx-background-color: #fce8e6; /* Light red background to make errors pop */
+    -fx-padding: 3px; /* Reduced padding */
+    -fx-border-radius: 5;
+    -fx-border-color: #f44336; /* Red border for the error message */
+    -fx-border-width: 1;
     -fx-alignment: center;
 }
 
-/* Popup HBox */
-.popup .hbox {
-    -fx-spacing: 10;
+/* Popup Layouts */
+.popup .vbox, .popup .hbox {
+    -fx-spacing: 12;
     -fx-alignment: center;
 }
 
-/* Adjust the width and size of the popup */
 .popup .vbox {
-    -fx-pref-width: 400;
-    -fx-pref-height: 200;
+    -fx-pref-width: 420;
+    -fx-pref-height: 240;
+}
+
+/* Modern style for the title label */
+.label-title {
+    -fx-font-family: "Segoe UI", "Roboto", sans-serif;  /* More modern sans-serif fonts */
+    -fx-font-size: 24px;  /* Larger font size for a more prominent title */
+    -fx-font-weight: bold;  /* Keep the title bold */
+    -fx-text-fill: #4a90e2;  /* Light blue color */
+    -fx-alignment: center;  /* Center the text */
+    -fx-padding: 15 0 15 0;  /* Add more padding for better spacing */
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0, 0, 3); /* Subtle shadow for modern effect */
+}
+
+/* Modern style for ComboBox */
+.combo-box {
+    -fx-background-color: #f7f7f7; /* Light gray background */
+    -fx-border-color: #a6d5ff; /* Light blue border */
+    -fx-border-radius: 5; /* Rounded corners */
+    -fx-padding: 3 10; /* Padding inside the ComboBox */
+    -fx-font-size: 14px; /* Modern font size */
+    -fx-font-family: "Segoe UI", "Roboto", sans-serif; /* Modern font */
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 5, 0, 0, 2); /* Subtle shadow for depth */
+}
+
+/* Style the arrow button of the ComboBox */
+.combo-box .arrow {
+    -fx-background-color: #a6d5ff; /* Light blue color for the arrow */
+    -fx-border-radius: 5;
+}
+
+/* Style the dropdown list */
+.combo-box .list-cell {
+    -fx-background-color: #e6f2ff; /* Light blue background for items */
+    -fx-text-fill: #333333; /* Dark text color for contrast */
+}
+
+.combo-box .list-cell:hover {
+    -fx-background-color: #a6d5ff; /* Light blue hover effect */
+    -fx-text-fill: white; /* White text when hovered */
+}
+
+/* Title Label Style */
+.title-label {
+    -fx-font-size: 16px; /* Larger font size for titles */
+    -fx-font-weight: bold; /* Make the titles bold */
+    -fx-text-fill: #4a90e2; /* Light blue color for consistency with other elements */
+    -fx-padding: 5px 0; /* Some padding around the label */
+}
+
+#statusLabel {
+    -fx-padding: 5px 10px;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 5;
+    -fx-text-fill: white;
+    -fx-alignment: center;
+}
+
+.status-success {
+    -fx-background-color: #4CAF50; /* Verde */
+}
+
+.status-error {
+    -fx-background-color: #F44336; /* Rosso */
+}
+
+.status-warning {
+    -fx-background-color: #FFC107; /* Giallo */
 }

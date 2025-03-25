@@ -11,6 +11,7 @@ import com.jataxmltransformer.logic.xml.XMLErrorReporter;
 import com.jataxmltransformer.logic.xml.XMLFormatter;
 import com.jataxmltransformer.logs.AppLogger;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -122,12 +123,24 @@ public class Middleware {
     }
 
     /**
-     * Sets the list of namespaces.
+     * Sets the list of namespaces after cleaning and formatting them.
      *
      * @param namespaces list of namespaces
      */
     public void setNamespaces(List<String> namespaces) {
-        checkStructure.setNamespaces(namespaces);
+        List<String> cleanedNamespaces = new ArrayList<>();
+
+        List<String> defaultNamespaces = checkStructure.getDefaultNamespaces();
+
+        for (String namespace : namespaces) {
+            if (!namespace.isBlank() && !defaultNamespaces.contains(namespace.replace(";;", ""))) {
+                if (!namespace.contains(";;"))
+                    namespace = namespace.concat(";;");
+                cleanedNamespaces.add(namespace);
+            }
+        }
+
+        checkStructure.setNamespaces(cleanedNamespaces);
     }
 
     /**

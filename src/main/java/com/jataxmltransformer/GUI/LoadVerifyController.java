@@ -1,23 +1,23 @@
 package com.jataxmltransformer.GUI;
 
-import com.jataxmltransformer.logic.data.EditedElement;
 import com.jataxmltransformer.logic.data.ErrorInfo;
 import com.jataxmltransformer.logic.data.Ontology;
-import com.jataxmltransformer.logic.utilities.MyPair;
-import com.jataxmltransformer.logic.xml.XMLDiffChecker;
-import com.jataxmltransformer.logic.xml.XMLFormatter;
 import com.jataxmltransformer.logs.AppLogger;
 import com.jataxmltransformer.middleware.Middleware;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
+import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Popup;
+
 
 import java.io.File;
 import java.io.IOException;
@@ -31,9 +31,8 @@ import java.util.List;
  */
 public class LoadVerifyController {
 
-    private List<ErrorInfo> errors = new ArrayList<>();
+    private final List<ErrorInfo> errors = new ArrayList<>();
     private List<String> ontologyLines;
-    private List<String> ontologyBackup;
     private Ontology ontologyData;
 
     @FXML
@@ -48,7 +47,6 @@ public class LoadVerifyController {
     @FXML
     public void initialize() {
         ontologyLines = new ArrayList<>();
-        ontologyBackup = new ArrayList<>();
         ontologyData = new Ontology();
     }
 
@@ -59,7 +57,8 @@ public class LoadVerifyController {
     @FXML
     private void loadOntologyFile() {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Ontology Files", "*.xml", "*.rdf", "*.owl"));
+        fileChooser.getExtensionFilters().add(new FileChooser
+                .ExtensionFilter("Ontology Files", "*.xml", "*.rdf", "*.owl"));
 
         File file = fileChooser.showOpenDialog(null);
         if (file != null) {
@@ -69,8 +68,10 @@ public class LoadVerifyController {
                 AppLogger.severe(e.getMessage());
             }
 
-            ontologyData.setOntologyName(file.getName().replace(".xml", "").replace(".rdf", "").replace(".owl", ""));
-            ontologyData.setOntologyExtension(file.getName().substring(file.getName().lastIndexOf(".") + 1));
+            ontologyData.setOntologyName(file.getName().replace(".xml", "")
+                    .replace(".rdf", "").replace(".owl", ""));
+            ontologyData.setOntologyExtension(file.getName().substring(file.getName()
+                    .lastIndexOf(".") + 1));
 
             if (ontologyData.getXmlData() != null && !ontologyData.getXmlData().isEmpty()) {
                 ontologyLines = new ArrayList<>(List.of(ontologyData.getXmlData().split("\\n")));
@@ -92,6 +93,11 @@ public class LoadVerifyController {
     @FXML
     private void verifyFile() {
         try {
+            if (ontologyLines.isEmpty()) {
+                statusLabel.setText("The ontology to verify cannot be empty!");
+                return;
+            }
+
             StringBuilder data = new StringBuilder();
             for (String line : ontologyLines) {
                 data.append(line).append("\n");
@@ -106,24 +112,29 @@ public class LoadVerifyController {
 
             boolean result = Middleware.getInstance().verifyOntology();
 
-            // Backup current ontology state before transformation
-            ontologyBackup.clear();
-            ontologyBackup.addAll(ontologyLines);
-
-            if (result)
+            if (result) {
+                statusLabel.getStyleClass().removeAll("status-success", "status-error", "status-warning");
+                statusLabel.getStyleClass().add("status-success");
                 statusLabel.setText("Ontology is valid.");
-            else {
+                ontologyListView.setStyle("-fx-background-color: green;");
+            } else {
+                statusLabel.getStyleClass().removeAll("status-success", "status-error", "status-warning");
+                statusLabel.getStyleClass().add("status-error");
                 statusLabel.setText("Ontology is not valid.");
+                ontologyListView.setStyle("-fx-background-color: #e6f2ff;");
 
                 // Transforming the ontology if it's invalid
-                if (!Middleware.getInstance().transformOntology())
+                if (!Middleware.getInstance().transformOntology()) {
+                    statusLabel.getStyleClass().removeAll("status-success", "status-error", "status-warning");
+                    statusLabel.getStyleClass().add("status-warning");
                     statusLabel.setText("There is a syntax error in the ontology loaded!");
+                    ontologyListView.setStyle("-fx-background-color: orange;");
+                }
                 List<ErrorInfo> errors = Middleware.getErrors();
                 highlightErrors(errors);
             }
         } catch (Exception e) {
             AppLogger.severe(e.getMessage());
-            statusLabel.setText(e.getMessage());
         }
     }
 
@@ -140,14 +151,12 @@ public class LoadVerifyController {
         List<Integer> processedLines = new ArrayList<>();
 
         for (int i = 0; i < ontologyLines.size(); i++) {
-            if (processedLines.contains(i)) {
+            if (processedLines.contains(i))
                 continue; // Skip lines that were already grouped into an error block
-            }
 
-            String line = ontologyLines.get(i);
             HBox hbox = new HBox(10);
             VBox block = new VBox();
-            Label lineLabel = new Label(line);
+            HBox.setHgrow(block, Priority.ALWAYS);
 
             boolean isErrorBlock = false;
             String errorMessage = "";
@@ -169,7 +178,30 @@ public class LoadVerifyController {
             // Collect all lines in this error block
             for (int j = blockStart; j <= blockEnd; j++) {
                 if (j < ontologyLines.size()) {
-                    block.getChildren().add(new Label(ontologyLines.get(j)));
+                    if (isErrorBlock) {
+                        // Instead of a TextField, create a Label for error messages
+                        Label errorLabel = new Label(ontologyLines.get(j));
+                        errorLabel.setStyle("-fx-background-color: transparent; " +
+                                "-fx-border-color: transparent; " +
+                                "-fx-padding: 2px 5px; " +
+                                "-fx-font-size: 12px; -fx-text-fill: red;");
+                        block.getChildren().add(errorLabel);
+                    } else {
+                        // Add TextField if there is no error
+                        TextField textField = new TextField(ontologyLines.get(j));
+                        HBox.setHgrow(textField, Priority.ALWAYS); // Ensures horizontal growth
+                        textField.setStyle("-fx-background-color: transparent; " +
+                                "-fx-border-color: transparent; " +
+                                "-fx-padding: 2px 5px; " +
+                                "-fx-font-size: 12px;");
+
+                        // Add listener to update ontologyLines when the text is changed
+                        int finalJ = j;
+                        textField.textProperty().addListener((_, _, newValue)
+                                -> ontologyLines.set(finalJ, newValue));
+
+                        block.getChildren().add(textField);
+                    }
                     processedLines.add(j);
                 }
             }
@@ -177,13 +209,17 @@ public class LoadVerifyController {
             // Style the error block
             if (isErrorBlock) {
                 block.setStyle("-fx-background-color: rgba(255, 0, 0, 0.2); -fx-padding: 5; -fx-border-color: red;");
+
+                // Create the "Fix" button
                 Button errorButton = new Button("Fix");
+                errorButton.getStyleClass().add("button-blue");
                 int finalStart = blockStart;
                 int finalEnd = blockEnd;
                 String finalErrorMessage = errorMessage;
                 String finalErrorDetails = errorDetails;
 
-                errorButton.setOnAction(e -> openDiffDialog(finalStart, finalEnd, finalErrorMessage, finalErrorDetails));
+                errorButton.setOnAction(_ ->
+                        openDiffDialog(finalStart, finalEnd, finalErrorMessage, finalErrorDetails));
                 hbox.getChildren().addAll(block, errorButton);
             } else {
                 hbox.getChildren().add(block);
@@ -198,9 +234,9 @@ public class LoadVerifyController {
      * to fix the error by modifying the corresponding ontology lines.
      *
      * @param startLineIndex The starting line index of the error block.
-     * @param endLineIndex The ending line index of the error block.
-     * @param errorMessage The message describing the error.
-     * @param errorDetails Additional details about the error.
+     * @param endLineIndex   The ending line index of the error block.
+     * @param errorMessage   The message describing the error.
+     * @param errorDetails   Additional details about the error.
      */
     private void openDiffDialog(int startLineIndex, int endLineIndex, String errorMessage, String errorDetails) {
         Popup popup = new Popup();
@@ -215,8 +251,10 @@ public class LoadVerifyController {
         }
 
         PopupController controller = loader.getController();
-        String blockText = String.join("\n", ontologyLines.subList(startLineIndex, Math.min(endLineIndex + 1, ontologyLines.size())));
-        controller.setPopupContext(startLineIndex, endLineIndex, blockText, errorMessage, errorDetails, popup, this);
+        String blockText = String.join("\n", ontologyLines
+                .subList(startLineIndex, Math.min(endLineIndex + 1, ontologyLines.size())));
+        controller.setPopupContext(startLineIndex, endLineIndex, blockText,
+                errorMessage, errorDetails, popup, this);
 
         // Position the popup near the first line of the error block
         if (startLineIndex >= ontologyListView.getItems().size()) {
@@ -242,7 +280,6 @@ public class LoadVerifyController {
     private void clearAll() {
         this.ontologyLines.clear();
         this.ontologyListView.getItems().clear();
-        this.ontologyBackup.clear();
         Middleware.getInstance().setOntologyInput(null);
     }
 

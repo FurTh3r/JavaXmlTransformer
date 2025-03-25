@@ -5,16 +5,20 @@
 <AnchorPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jataxmltransformer.GUI.NamespacesHandlerController"
             stylesheets="@styles.css">
     <VBox spacing="10" AnchorPane.topAnchor="10" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10">
-        <Label text="Namespaces"/>
-        <ListView fx:id="namespaceListView" editable="true" prefHeight="200" prefWidth="300"/>
-        <HBox spacing="10">
-            <Button text="Add" onAction="#addNamespace"/>
-            <Button text="Remove" onAction="#removeNamespace"/>
-            <Button text="Clear All" onAction="#clearAll"/>
+            <Label text="Namespaces" styleClass="label-title"/>
+        <ListView fx:id="namespaceListView" editable="true" prefHeight="200" prefWidth="300" />
+
+        <!-- Action Buttons -->
+        <HBox spacing="15" alignment="center">
+            <Button text="Add" onAction="#addNamespace" styleClass="button-add" />
+            <Button text="Remove" onAction="#removeNamespace" styleClass="button-remove" />
+            <Button text="Clear All" onAction="#clearAll" styleClass="button-clear" />
         </HBox>
-        <HBox spacing="10">
-            <Button text="Load from JSON" onAction="#loadNamespaces"/>
-            <Button text="Save to JSON" onAction="#saveNamespaces"/>
+
+        <!-- File Operations (Blue Buttons) -->
+        <HBox spacing="15" alignment="center">
+            <Button text="Load from JSON" onAction="#loadNamespaces" styleClass="button-blue" />
+            <Button text="Save to JSON" onAction="#saveNamespaces" styleClass="button-blue" />
         </HBox>
     </VBox>
 </AnchorPane>

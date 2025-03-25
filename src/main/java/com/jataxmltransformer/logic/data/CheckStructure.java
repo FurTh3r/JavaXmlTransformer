@@ -30,12 +30,12 @@ public class CheckStructure {
      */
     public List<String> getDefaultNamespaces() {
         return List.of(
-                "namespace skos = \"http://www.w3.org/2004/02/skos/core#\";;",
-                "namespace owl = \"http://www.w3.org/2002/07/owl#\";;",
-                "namespace rdf = \"http://www.w3.org/1999/02/22-rdf-syntax-ns#\";;",
-                "namespace xml = \"http://www.w3.org/XML/1998/namespace\";;",
-                "namespace xsd = \"http://www.w3.org/2001/XMLSchema#\";;",
-                "namespace rdfs = \"http://www.w3.org/2000/01/rdf-schema#\";;"
+                "namespace skos = \"http://www.w3.org/2004/02/skos/core#\"",
+                "namespace owl = \"http://www.w3.org/2002/07/owl#\"",
+                "namespace rdf = \"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"",
+                "namespace xml = \"http://www.w3.org/XML/1998/namespace\"",
+                "namespace xsd = \"http://www.w3.org/2001/XMLSchema#\"",
+                "namespace rdfs = \"http://www.w3.org/2000/01/rdf-schema#\""
         );
     }
 

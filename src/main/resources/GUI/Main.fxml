@@ -1,13 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
 <AnchorPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jataxmltransformer.GUI.MainController"
             stylesheets="@styles.css">
-    <TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE">
-        <Tab text="Namespaces Handler"/>
-        <Tab text="Gestione Classi e Attributi"/>
-        <Tab text="Carica e Verifica Ontologia"/>
-        <Tab text="Salvataggio"/>
-    </TabPane>
+    <HBox alignment="CENTER" spacing="20">
+        <!-- Define padding using Insets -->
+        <padding>
+            <Insets top="20" right="20" bottom="20" left="20"/>
+        </padding>
+        <TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE">
+            <Tab text="Namespaces Handler"/>
+            <Tab text="Classes and Attributes Handler"/>
+            <Tab text="Load and Verify Ontology"/>
+            <Tab text="Save Ontology"/>
+        </TabPane>
+    </HBox>
 </AnchorPane>

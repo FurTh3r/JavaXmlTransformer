@@ -8,3 +8,10 @@ TODO 1: Ensure the diff check works both ways.
 // This way, the checker will correctly detect differences in both directions.
 
 ########################################################################################################################
+TODO 2:
+Method to getErrors that given two errors one inside the other makes a union and gives just the outer.
+
+########################################################################################################################
+Refactoring
+Make error alerts better
+showing the ontology edited by CDuce? (New Window?)

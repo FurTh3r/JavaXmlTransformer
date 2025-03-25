@@ -133,6 +133,21 @@ public class XMLFormatter {
      * and returns a new {@link Ontology} object with the formatted XML data.
      *
      * @param ontology The Ontology object whose XML data needs to be formatted.
+     * @param formatNamespacesOnNewLine A flag to indicate whether to break lines for namespaces.
+     * @return A new Ontology object with the reformatted XML data.
+     * @throws Exception If an error occurs during XML formatting.
+     */
+    public static Ontology formatOntologyNamespaces(Ontology ontology, boolean formatNamespacesOnNewLine)
+            throws Exception {
+        XMLFormatter.formatNamespacesOnNewLine = formatNamespacesOnNewLine;
+        return formatOntologyInner(ontology);
+    }
+
+    /**
+     * Formats the XML data of the given {@link Ontology} object
+     * and returns a new {@link Ontology} object with the formatted XML data.
+     *
+     * @param ontology The Ontology object whose XML data needs to be formatted.
      * @return A new Ontology object with the reformatted XML data.
      * @throws Exception If an error occurs during XML formatting.
      */
