@@ -190,8 +190,7 @@ public class NamespacesHandlerController {
             });
 
             FileHandler.saveFile("JSON File", "*.json", JSONContent);
-        }
-        else {
+        } else {
             CustomAlert.showError("No data to save", """
                     No data to save:
                     Please add at least one namespace.""");

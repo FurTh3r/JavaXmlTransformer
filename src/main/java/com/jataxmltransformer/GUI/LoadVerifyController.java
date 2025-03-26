@@ -2,13 +2,13 @@ package com.jataxmltransformer.GUI;
 
 import com.jataxmltransformer.logic.data.ErrorInfo;
 import com.jataxmltransformer.logic.data.Ontology;
+import com.jataxmltransformer.logic.xml.XMLFormatter;
 import com.jataxmltransformer.logs.AppLogger;
 import com.jataxmltransformer.middleware.Middleware;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.TextFieldListCell;
@@ -17,7 +17,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Popup;
-
 
 import java.io.File;
 import java.io.IOException;
@@ -32,11 +31,14 @@ import java.util.List;
 public class LoadVerifyController {
 
     private final List<ErrorInfo> errors = new ArrayList<>();
+
     private List<String> ontologyLines;
     private Ontology ontologyData;
 
     @FXML
     private ListView<HBox> ontologyListView; // ListView to display ontology lines with error highlighting
+    @FXML
+    private ListView<String> ontologyTransformedListView; // ListView to display ontology lines transformed
     @FXML
     private Label statusLabel; // Label to display status messages during verification
 
@@ -48,6 +50,7 @@ public class LoadVerifyController {
     public void initialize() {
         ontologyLines = new ArrayList<>();
         ontologyData = new Ontology();
+        ontologyListView.onScrollToProperty().bindBidirectional(ontologyTransformedListView.onScrollToProperty());
     }
 
     /**
@@ -66,6 +69,8 @@ public class LoadVerifyController {
                 ontologyData.loadXmlFromFile(file.getAbsolutePath());
             } catch (IOException e) {
                 AppLogger.severe(e.getMessage());
+                CustomAlert.showError("Error", "Error loading ontology file: " + e.getMessage());
+                return;
             }
 
             ontologyData.setOntologyName(file.getName().replace(".xml", "")
@@ -78,20 +83,28 @@ public class LoadVerifyController {
                 highlightErrors(new ArrayList<>());
             } else {
                 AppLogger.severe("Ontology file is empty or could not be loaded.");
+                CustomAlert.showError("Error", "Ontology file is empty or could not be loaded.");
+                return;
             }
 
             Middleware.getInstance().setOntologyInput(ontologyData);
+
+            // Clearing the transformed ListView
+            ontologyTransformedListView.getItems().clear();
         } else {
             AppLogger.severe("Ontology file is null");
+            CustomAlert.showError("Error", "Ontology file is null.");
         }
     }
 
     /**
-     * Verifies the loaded ontology and performs necessary transformations if the ontology is invalid.
+     * Verifies the loaded ontology and performs the necessary transformations if the ontology is invalid.
      * The status label is updated with the verification status.
      */
     @FXML
     private void verifyFile() {
+        // Clearing the transformed ListView
+        ontologyTransformedListView.getItems().clear();
         try {
             if (ontologyLines.isEmpty()) {
                 statusLabel.setText("The ontology to verify cannot be empty!");
@@ -99,9 +112,9 @@ public class LoadVerifyController {
             }
 
             StringBuilder data = new StringBuilder();
-            for (String line : ontologyLines) {
+            for (String line : ontologyLines)
                 data.append(line).append("\n");
-            }
+
             ontologyData.setXmlData(data.toString());
 
             Middleware.getInstance().setOntologyInput(ontologyData);
@@ -112,13 +125,12 @@ public class LoadVerifyController {
 
             boolean result = Middleware.getInstance().verifyOntology();
 
+            statusLabel.getStyleClass().removeAll("status-success", "status-error", "status-warning");
             if (result) {
-                statusLabel.getStyleClass().removeAll("status-success", "status-error", "status-warning");
                 statusLabel.getStyleClass().add("status-success");
                 statusLabel.setText("Ontology is valid.");
                 ontologyListView.setStyle("-fx-background-color: green;");
             } else {
-                statusLabel.getStyleClass().removeAll("status-success", "status-error", "status-warning");
                 statusLabel.getStyleClass().add("status-error");
                 statusLabel.setText("Ontology is not valid.");
                 ontologyListView.setStyle("-fx-background-color: #e6f2ff;");
@@ -131,10 +143,34 @@ public class LoadVerifyController {
                     ontologyListView.setStyle("-fx-background-color: orange;");
                 }
                 List<ErrorInfo> errors = Middleware.getErrors();
+                setTransformedOntologyLines();
                 highlightErrors(errors);
             }
         } catch (Exception e) {
             AppLogger.severe(e.getMessage());
+            CustomAlert.showError("Error", "Error verifying ontology: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Processes and sets the list of ontology lines that have undergone transformation.
+     * This method updates the internal state of the controller to reflect the transformed ontology lines
+     */
+    private void setTransformedOntologyLines() {
+        try {
+            Ontology transformedOntology = Middleware.getInstance().getOntologyOutput();
+            if (transformedOntology.isEmpty() || transformedOntology.getXmlData() == null) {
+                ontologyTransformedListView.getItems().clear();
+                return;
+            }
+            transformedOntology = XMLFormatter.formatOntology(transformedOntology, true);
+            ontologyTransformedListView.getItems().clear();
+            ontologyTransformedListView.getItems().addAll(transformedOntology.getXmlData().split("\\n"));
+            ontologyTransformedListView.setCellFactory(TextFieldListCell.forListView());
+            ontologyTransformedListView.setEditable(false);
+        } catch (Exception e) {
+            AppLogger.severe(e.getMessage());
+            CustomAlert.showError("Error", "Error setting transformed ontology lines: " + e.getMessage());
         }
     }
 
@@ -221,9 +257,8 @@ public class LoadVerifyController {
                 errorButton.setOnAction(_ ->
                         openDiffDialog(finalStart, finalEnd, finalErrorMessage, finalErrorDetails));
                 hbox.getChildren().addAll(block, errorButton);
-            } else {
+            } else
                 hbox.getChildren().add(block);
-            }
 
             ontologyListView.getItems().add(hbox);
         }
@@ -247,6 +282,7 @@ public class LoadVerifyController {
             popup.getContent().add(popupContent);
         } catch (IOException e) {
             AppLogger.severe("Error loading popup layout: " + e.getMessage());
+            CustomAlert.showError("Error", "Error loading popup layout: " + e.getMessage());
             return;
         }
 
@@ -259,6 +295,7 @@ public class LoadVerifyController {
         // Position the popup near the first line of the error block
         if (startLineIndex >= ontologyListView.getItems().size()) {
             AppLogger.severe("Invalid block index for popup: " + startLineIndex);
+            CustomAlert.showError("Error", "Invalid block index for popup, check Logs for details.");
             return;
         }
 

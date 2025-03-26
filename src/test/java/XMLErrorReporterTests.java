@@ -13,8 +13,6 @@ import static org.junit.Assert.assertNull;
 
 public class XMLErrorReporterTests {
 
-    private IXMLErrorReporter xmlErrorReporter;
-
     /**
      * Sample XML string used for testing.
      */
@@ -36,6 +34,7 @@ public class XMLErrorReporterTests {
                     </owl:Class>
                 </rdf:RDF>
             """;
+    private IXMLErrorReporter xmlErrorReporter;
 
     @Before
     public void setUp() {

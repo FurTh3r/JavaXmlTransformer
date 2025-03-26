@@ -82,8 +82,10 @@ public class PopupController {
         // Prevent NullPointerException when setting the error message label
         if (errorMessageLabel != null)
             errorMessageLabel.setText("Error: " + errorMessage + "\nDetails: " + errorDetails);
-        else
+        else {
             AppLogger.severe("errorMessageLabel is null inside setPopupContext!");
+            CustomAlert.showError("Error", "The errorMessageLabel is null! Check Log file for details.");
+        }
     }
 
     /**

@@ -52,6 +52,10 @@ public class Middleware {
      */
     public static void resetInstance() {
         instance = null;
+        checkStructure = new CheckStructure();
+        ontologyInput = new Ontology();
+        ontologyOutput = new Ontology();
+        AppLogger.close();
     }
 
     /**

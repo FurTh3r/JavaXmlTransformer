@@ -8,9 +8,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -18,10 +16,7 @@ import javafx.util.StringConverter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import javafx.scene.control.TextField;
-import javafx.scene.control.Label;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -230,8 +225,7 @@ public class StructureHandlerController {
 
             // Pretty print JSON
             FileHandler.saveFile("JSON File", "*.json", JSONContent.toString(4));
-        }
-        else {
+        } else {
             CustomAlert.showError("No data to save", """
                     No data to save:
                     Please add at least one structure line, class, or attribute.""");
@@ -258,6 +252,11 @@ public class StructureHandlerController {
         structureListView.getItems().clear();
     }
 
+    /**
+     * Custom ListCell for displaying and editing class and attribute pairs in a ListView.
+     * This class handles in-place editing of class and attribute names, as well as
+     * displaying the type (class or attribute) alongside the name.
+     */
     public static class ClassAttributeCell extends ListCell<MyPair<String, String>> {
         private final HBox hBox = new HBox();
         private final TextField textField = new TextField();
@@ -298,6 +297,14 @@ public class StructureHandlerController {
             });
         }
 
+        /**
+         * Updates the item displayed in the ListCell based on the current editing state.
+         * If the cell is being edited, a text field is displayed. If not, the name and type
+         * are displayed in a horizontal box.
+         *
+         * @param item  The item to be displayed in the ListCell.
+         * @param empty A boolean indicating whether the item is empty.
+         */
         @Override
         protected void updateItem(MyPair<String, String> item, boolean empty) {
             super.updateItem(item, empty);
@@ -323,6 +330,10 @@ public class StructureHandlerController {
             }
         }
 
+        /**
+         * Begins the editing of the current item. A text field is displayed to allow the user
+         * to edit the name of the class or attribute.
+         */
         @Override
         public void startEdit() {
             if (!isEmpty()) {
@@ -333,18 +344,32 @@ public class StructureHandlerController {
             }
         }
 
+        /**
+         * Cancels the current editing operation and restores the display box with the item.
+         */
         @Override
         public void cancelEdit() {
             super.cancelEdit();
             setGraphic(getDisplayBox(getItem()));
         }
 
+        /**
+         * Commits the changes made during editing and updates the display box with the new item.
+         *
+         * @param newValue The new value for the item being edited.
+         */
         @Override
         public void commitEdit(MyPair<String, String> newValue) {
             super.commitEdit(newValue);
             setGraphic(getDisplayBox(newValue));
         }
 
+        /**
+         * Creates a display box containing the class or attribute name and its type.
+         *
+         * @param item The item to be displayed in the box.
+         * @return A HBox containing the name and type of the item.
+         */
         private HBox getDisplayBox(MyPair<String, String> item) {
             Label nameLabel = new Label(item.getFirst());
             HBox spacer = new HBox();

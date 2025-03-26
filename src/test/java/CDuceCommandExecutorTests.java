@@ -57,6 +57,29 @@ public class CDuceCommandExecutorTests {
     }
 
     /**
+     * This method returns the expected output used in the tests.
+     *
+     * @return the expected output.
+     */
+    private static Ontology getExpected() {
+        Ontology expected = new Ontology();
+        expected.setXmlData("""
+                <?xml version="1.0" encoding="UTF-8"?>
+                <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+                    xmlns:owl="http://www.w3.org/2002/07/owl#"
+                    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+                    xmlns:skos="http://www.w3.org/2004/02/skos/core#"\s
+                    xml:base="http://www.persone/">
+                    <owl:Class rdf:about="http://www.persone#Individuo">
+                        <rdfs:label xml:lang="it">Ind</rdfs:label>
+                        <skos:scopeNote xml:lang="it">Class</skos:scopeNote>
+                    </owl:Class>
+                </rdf:RDF>
+                """);
+        return expected;
+    }
+
+    /**
      * Verifies that an ontology is correct based on its XML structure.
      * This test ensures the ontology is well-formed and follows the
      * specified structure for ontology classes and attributes.
@@ -350,29 +373,6 @@ public class CDuceCommandExecutorTests {
 
         Ontology output = commandExecutor.transformOntology(input);
         assertEquals(formatXMLFromString(output.getXmlData()), formatXMLFromString(expected.getXmlData()));
-    }
-
-    /**
-     * This method returns the expected output used in the tests.
-     *
-     * @return the expected output.
-     */
-    private static Ontology getExpected() {
-        Ontology expected = new Ontology();
-        expected.setXmlData("""
-                <?xml version="1.0" encoding="UTF-8"?>
-                <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-                    xmlns:owl="http://www.w3.org/2002/07/owl#"
-                    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
-                    xmlns:skos="http://www.w3.org/2004/02/skos/core#"\s
-                    xml:base="http://www.persone/">
-                    <owl:Class rdf:about="http://www.persone#Individuo">
-                        <rdfs:label xml:lang="it">Ind</rdfs:label>
-                        <skos:scopeNote xml:lang="it">Class</skos:scopeNote>
-                    </owl:Class>
-                </rdf:RDF>
-                """);
-        return expected;
     }
 
     /**

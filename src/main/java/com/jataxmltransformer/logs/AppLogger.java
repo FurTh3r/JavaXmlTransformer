@@ -3,29 +3,47 @@ package com.jataxmltransformer.logs;
 import io.github.cdimascio.dotenv.Dotenv;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 import java.util.logging.*;
 
 /**
  * A utility class for logging application events at various levels (INFO, WARNING, SEVERE, etc.).
- * It supports logging to both a console and a file, using a configurable log file path.
+ * It supports logging to both a console and a file, using a configurable log directory.
  * <p>
- * This class uses a custom log formatter that includes timestamps for each log entry.
- * Logging levels can be adjusted as needed, and the class prevents resource leaks by
- * allowing the file handler to be closed properly.
+ * This class creates a new log file on each application startup with a unique timestamp.
+ * It maintains only the 10 most recent log files, deleting older ones automatically.
  */
 public class AppLogger {
 
     private static final Logger logger = Logger.getLogger(AppLogger.class.getName());
+    private static final int MAX_LOG_FILES = 10;
     private static final FileHandler fileHandler;
 
     // Static block for initializing logger settings
     static {
         try {
             Dotenv dotenv = Dotenv.load();
-            String logPath = dotenv.get("LOG_PATH");
-            fileHandler = new FileHandler(logPath, true);
+            String logDirectory = dotenv.get("LOG_DIRECTORY", "logs");
+            Path logDirPath = Paths.get(logDirectory);
+
+            // Create log directory if it doesn't exist
+            if (!Files.exists(logDirPath)) {
+                Files.createDirectories(logDirPath);
+            }
+
+            // Generate unique log file name with timestamp
+            String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+            String logFileName = String.format("app_%s.log", timestamp);
+            Path logFilePath = logDirPath.resolve(logFileName);
+
+            // Initialize file handler
+            fileHandler = new FileHandler(logFilePath.toString(), true);
 
             // Apply custom formatter to handlers
             CustomFormatter formatter = new CustomFormatter();
@@ -44,8 +62,47 @@ public class AppLogger {
 
             // Disable default parent handlers
             logger.setUseParentHandlers(false);
+
+            // Clean up old log files
+            cleanUpOldLogs(logDirPath);
+
+            // Log initialization
+            logger.info(String.format("Logging initialized. Log file: %s", logFilePath));
+
         } catch (IOException e) {
             throw new RuntimeException("Error while configuring log: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Cleans up old log files, keeping only the MAX_LOG_FILES most recent ones.
+     *
+     * @param logDirPath Path to the log directory
+     * @throws IOException If an I/O error occurs
+     */
+    private static void cleanUpOldLogs(Path logDirPath) throws IOException {
+        List<Path> logFiles = Files.list(logDirPath)
+                .filter(path -> path.toString().endsWith(".log"))
+                .sorted(Comparator.comparingLong(path -> {
+                    try {
+                        return Files.getLastModifiedTime(path).toMillis();
+                    } catch (IOException e) {
+                        return 0;
+                    }
+                }))
+                .toList();
+
+        if (logFiles.size() > MAX_LOG_FILES) {
+            int filesToDelete = logFiles.size() - MAX_LOG_FILES;
+            for (int i = 0; i < filesToDelete; i++) {
+                try {
+                    Files.delete(logFiles.get(i));
+                    logger.fine(String.format("Deleted old log file: %s", logFiles.get(i)));
+                } catch (IOException e) {
+                    logger.warning(String.format("Failed to delete old log file %s: %s",
+                            logFiles.get(i), e.getMessage()));
+                }
+            }
         }
     }
 

@@ -205,7 +205,8 @@ class XMLFormatterTests {
     @Test
     void testFormatOntologyPreservesXmlDeclaration() throws Exception {
         Ontology formattedOntology = XMLFormatter.formatOntology(ontology, true);
-        assertTrue(formattedOntology.getXmlData().startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"));
+        assertTrue(formattedOntology.getXmlData()
+                .startsWith("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"));
     }
 
     /**
