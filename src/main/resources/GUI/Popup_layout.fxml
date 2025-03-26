@@ -1,33 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!-- Main VBox layout with a controller and applied styles -->
 <?import javafx.scene.control.*?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.*?>
 <VBox xmlns:fx="http://javafx.com/fxml" fx:controller="com.jataxmltransformer.GUI.PopupController" spacing="10"
       stylesheets="@styles.css" styleClass="popup">
 
-    <!-- Use TextArea for multiple lines of text -->
+    <!-- Horizontal box to hold both text areas -->
     <HBox spacing="10">
+
+        <!-- VBox for the original (read-only) code section -->
         <VBox>
-            <!-- Label for the first TextArea (Original Code) -->
+            <!-- Label for the original code section -->
             <Label text="Original Code (Not Edited)" styleClass="title-label"/>
-            <TextArea fx:id="originalText" editable="false" prefWidth="300" prefHeight="400" wrapText="true"/>
+            <!-- Non-editable TextArea to display the original code -->
+            <TextArea fx:id="originalText" editable="false" prefWidth="300" prefHeight="300"/>
         </VBox>
 
+        <!-- VBox for the editable code section -->
         <VBox>
-            <!-- Label for the second TextArea (Editable Code) -->
+            <!-- Label for the editable code section -->
             <Label text="Editable Code" styleClass="title-label"/>
-            <TextArea fx:id="editedText" prefWidth="300" prefHeight="400" wrapText="true"/>
+            <!-- Editable TextArea for user modifications -->
+            <TextArea fx:id="editedText" prefWidth="300" prefHeight="300"/>
         </VBox>
     </HBox>
 
-    <!-- Buttons for saving, canceling, and removing lines -->
+    <!-- HBox containing buttons for user actions -->
     <HBox spacing="10" alignment="center">
+        <!-- Button to save the modified text -->
         <Button text="Save" fx:id="saveButton" styleClass="button-blue"/>
+        <!-- Button to cancel modifications and close the popup -->
         <Button text="Cancel" fx:id="cancelButton" styleClass="button-clear"/>
+        <!-- Button to remove a selected line from the editable text -->
         <Button text="Remove Line" fx:id="removeButton" styleClass="button-remove"/>
     </HBox>
 
-    <!-- Error message label -->
+    <!-- Label to display error messages -->
     <Label fx:id="errorMessageLabel" alignment="center" styleClass="error-message"/>
 </VBox>

@@ -1,23 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!-- Main layout using AnchorPane, linked to its controller -->
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <AnchorPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jataxmltransformer.GUI.LoadVerifyController"
             stylesheets="@styles.css">
+
+    <!-- Main VBox container with spacing and anchored to the sides -->
     <VBox spacing="10" AnchorPane.topAnchor="10" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10">
 
+        <!-- Title label -->
         <Label text="Load Ontology" styleClass="label-title"/>
 
-
+        <!-- Button to load an ontology file -->
         <Button text="Load File" onAction="#loadOntologyFile" styleClass="button-blue"/>
 
-        <!-- Use CodeArea for displaying ontology content -->
-        <ListView fx:id="ontologyListView" prefHeight="300" prefWidth="500"/>
+        <!-- Horizontal container for ontology views -->
+        <HBox>
+            <VBox>
+                <!-- Label for the original ontology editor -->
+                <Label text="Ontology Editor"/>
+                <!-- ListView to display the ontology with errors -->
+                <ListView fx:id="ontologyListView" prefHeight="300" prefWidth="500"/>
+            </VBox>
 
+            <VBox>
+                <!-- Label for the transformed ontology -->
+                <Label text="Transformed Ontology"/>
+                <!-- ListView to display the transformed ontology -->
+                <ListView fx:id="ontologyTransformedListView" prefHeight="300" prefWidth="500"/>
+            </VBox>
+        </HBox>
+
+        <!-- Button section -->
         <HBox spacing="10" alignment="center">
+            <!-- Button to verify the ontology file -->
             <Button text="Verify" onAction="#verifyFile" styleClass="button-blue"/>
+            <!-- Button to clear all loaded data -->
             <Button text="ClearAll" onAction="#clearAll" styleClass="button-clear"/>
         </HBox>
+
+        <!-- Status label to show messages -->
         <Label fx:id="statusLabel" alignment="center"/>
     </VBox>
 </AnchorPane>

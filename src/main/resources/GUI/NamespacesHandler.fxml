@@ -1,24 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!-- Main layout using AnchorPane, linked to its controller -->
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <AnchorPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jataxmltransformer.GUI.NamespacesHandlerController"
             stylesheets="@styles.css">
+
+    <!-- VBox container to organize elements vertically with spacing -->
     <VBox spacing="10" AnchorPane.topAnchor="10" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10">
-            <Label text="Namespaces" styleClass="label-title"/>
-        <ListView fx:id="namespaceListView" editable="true" prefHeight="200" prefWidth="300" />
 
-        <!-- Action Buttons -->
+        <!-- Title label for the namespaces section -->
+        <Label text="Namespaces" styleClass="label-title"/>
+
+        <!-- ListView to display and edit namespaces -->
+        <ListView fx:id="namespaceListView" editable="true" prefHeight="200" prefWidth="300"/>
+
+        <!-- Action buttons for managing namespaces -->
         <HBox spacing="15" alignment="center">
-            <Button text="Add" onAction="#addNamespace" styleClass="button-add" />
-            <Button text="Remove" onAction="#removeNamespace" styleClass="button-remove" />
-            <Button text="Clear All" onAction="#clearAll" styleClass="button-clear" />
+            <!-- Button to add a new namespace -->
+            <Button text="Add" onAction="#addNamespace" styleClass="button-add"/>
+            <!-- Button to remove a selected namespace -->
+            <Button text="Remove" onAction="#removeNamespace" styleClass="button-remove"/>
+            <!-- Button to clear all namespaces -->
+            <Button text="Clear All" onAction="#clearAll" styleClass="button-clear"/>
         </HBox>
 
-        <!-- File Operations (Blue Buttons) -->
+        <!-- File operation buttons for loading and saving namespaces -->
         <HBox spacing="15" alignment="center">
-            <Button text="Load from JSON" onAction="#loadNamespaces" styleClass="button-blue" />
-            <Button text="Save to JSON" onAction="#saveNamespaces" styleClass="button-blue" />
+            <!-- Button to load namespaces from a JSON file -->
+            <Button text="Load from JSON" onAction="#loadNamespaces" styleClass="button-blue"/>
+            <!-- Button to save namespaces to a JSON file -->
+            <Button text="Save to JSON" onAction="#saveNamespaces" styleClass="button-blue"/>
         </HBox>
+
     </VBox>
 </AnchorPane>

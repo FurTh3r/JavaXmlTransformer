@@ -1,30 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!-- Root container using AnchorPane, linked to StructureHandlerController -->
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <AnchorPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jataxmltransformer.GUI.StructureHandlerController"
             stylesheets="@styles.css">
+
+    <!-- VBox to arrange components vertically with spacing -->
     <VBox spacing="10" AnchorPane.topAnchor="10" AnchorPane.leftAnchor="10" AnchorPane.rightAnchor="10">
+
+        <!-- Section for managing structure elements -->
         <Label text="Structure" styleClass="label-title"/>
         <ListView fx:id="structureListView" editable="true" prefHeight="150" prefWidth="300"/>
+
+        <!-- Buttons for structure management -->
         <HBox spacing="10" alignment="center">
             <Button text="Add" onAction="#addStructureLine" styleClass="button-add"/>
             <Button text="Remove" onAction="#removeStructureLine" styleClass="button-remove"/>
             <Button text="Clear All" onAction="#clearAllStructure" styleClass="button-clear"/>
         </HBox>
 
+        <!-- Section for managing classes and attributes -->
         <Label text="Classes and Attributes" styleClass="label-title"/>
         <ListView fx:id="classAttributesListView" editable="true" prefHeight="150" prefWidth="300"/>
+
+        <!-- Buttons for class and attribute management -->
         <HBox spacing="10" alignment="center">
+            <!-- Dropdown for selecting the type of element -->
             <ComboBox fx:id="typeOfElement" styleClass="combo-box" minWidth="145"/>
             <Button text="Add" onAction="#addClassAttributeLine" styleClass="button-add"/>
             <Button text="Remove" onAction="#removeClassAttributeLine" styleClass="button-remove"/>
             <Button text="Clear All" onAction="#clearAllClassAttribute" styleClass="button-clear"/>
         </HBox>
 
+        <!-- Buttons for loading and saving structure data -->
         <HBox spacing="10" alignment="center">
             <Button text="Load from JSON" onAction="#loadStructure" styleClass="button-blue"/>
             <Button text="Save to JSON" onAction="#saveStructure" styleClass="button-blue"/>
         </HBox>
+
     </VBox>
 </AnchorPane>

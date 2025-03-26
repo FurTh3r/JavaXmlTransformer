@@ -1,21 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!-- Main layout using AnchorPane, linked to its controller -->
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <AnchorPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.jataxmltransformer.GUI.MainController"
             stylesheets="@styles.css">
+
+    <!-- HBox container to align elements horizontally with spacing -->
     <HBox alignment="CENTER" spacing="20">
-        <!-- Define padding using Insets -->
+
+        <!-- Define padding around the HBox using Insets -->
         <padding>
             <Insets top="20" right="20" bottom="20" left="20"/>
         </padding>
+
+        <!-- TabPane to organize different functionalities into tabs -->
         <TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE">
+
+            <!-- Tab for handling namespaces -->
             <Tab text="Namespaces Handler"/>
+
+            <!-- Tab for managing classes and attributes -->
             <Tab text="Classes and Attributes Handler"/>
+
+            <!-- Tab for loading and verifying ontology files -->
             <Tab text="Load and Verify Ontology"/>
+
+            <!-- Tab for saving the ontology -->
             <Tab text="Save Ontology"/>
+
         </TabPane>
     </HBox>
 </AnchorPane>
