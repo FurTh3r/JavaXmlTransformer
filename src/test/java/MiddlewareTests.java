@@ -363,11 +363,12 @@ class MiddlewareTests {
         // Retrieve the errors
         List<ErrorInfo> errors = Middleware.getErrors();
 
-        // Assert that there are 2 errors due to missing element in class (label and outer class)
-        assertEquals(2, errors.size());
+        // Assert that there is 1 error due to missing element in class (label and outer class)
+        // 2 if removing the IGNORE_OUTER_NODES set to false
+        assertEquals(1, errors.size());
 
         // Verify the error message and line numbers
-        ErrorInfo error = errors.get(1);
+        ErrorInfo error = errors.getFirst();
         assertEquals("", error.errorMessage());
         assertEquals(8, error.startLine()); // Checking the start line
         assertEquals(8, error.endLine());   // Checking the end line

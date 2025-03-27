@@ -14,6 +14,8 @@ import java.util.List;
  * the relevant line information from the associated XPath.
  */
 public class XMLErrorReporter implements IXMLErrorReporter {
+    // Set this to true to ignore external nodes in ontology errors
+    private final boolean IGNORE_OUTER_NODES = true;
 
     private final IXPathCustomParser xPathCustomParser;
 
@@ -35,7 +37,7 @@ public class XMLErrorReporter implements IXMLErrorReporter {
      *
      * @param editedElements The list of edited elements to be analyzed for errors.
      * @return A list of {@link ErrorInfo} objects containing error details, including line numbers,
-     *         element data, and element IDs.
+     * element data, and element IDs.
      */
     @Override
     public List<ErrorInfo> generateErrorInfo(List<EditedElement> editedElements) {
@@ -44,6 +46,10 @@ public class XMLErrorReporter implements IXMLErrorReporter {
         for (EditedElement editedElement : editedElements) {
             // Ignore /RDF[1] because it's a useless error (tells there are errors in the XML)
             if (editedElement.getXPath() == null || editedElement.getXPath().equals("/RDF[1]"))
+                continue;
+
+            // Ignores external nodes (useless)
+            if (editedElement.getXPath().equals(editedElement.getTestPath()) && IGNORE_OUTER_NODES)
                 continue;
 
             MyPair<Integer, Integer> lines = xPathCustomParser.getInfoFromXPath(editedElement.getXPath());

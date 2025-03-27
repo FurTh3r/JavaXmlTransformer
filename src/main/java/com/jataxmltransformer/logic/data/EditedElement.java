@@ -1,5 +1,8 @@
 package com.jataxmltransformer.logic.data;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * Represents an edited element in an XML file, containing information about the difference found.
  */
@@ -78,6 +81,25 @@ public class EditedElement {
      */
     public void setXPath(String xPath) {
         this.xPath = xPath;
+    }
+
+    /**
+     * Extracts the test XPath value from the identifier string if it matches the predefined pattern.
+     * The identifier should contain a segment in the format "Test XPath: value" where "value" is the desired text to extract.
+     *
+     * @return The extracted test XPath value if found, or null if the pattern does not match.
+     */
+    public String getTestPath() {
+        if (id == null)
+            return "";
+
+        Pattern pattern = Pattern.compile("Test XPath: (.*?)(?:\\s*\\|\\s*|$)");
+        Matcher matcher = pattern.matcher(id);
+
+        if (matcher.find())
+            return matcher.group(1);
+        else
+            return "";
     }
 
     /**
