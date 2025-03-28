@@ -102,7 +102,7 @@ public class LoadVerifyController {
      * The status label is updated with the verification status.
      */
     @FXML
-    private void verifyFile() {
+    public void verifyFile() {
         // Clearing the transformed ListView
         ontologyTransformedListView.getItems().clear();
         try {

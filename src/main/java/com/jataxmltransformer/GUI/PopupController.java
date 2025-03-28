@@ -111,6 +111,7 @@ public class PopupController {
 
         // Refresh the ListView to reflect changes
         parentController.highlightErrors(parentController.getErrors());
+        parentController.verifyFile();
         popup.hide(); // Close the popup
     }
 
@@ -138,6 +139,7 @@ public class PopupController {
 
         // Refresh the ListView to reflect changes
         parentController.highlightErrors(parentController.getErrors());
+        parentController.verifyFile();
         popup.hide(); // Close the popup
     }
 }
