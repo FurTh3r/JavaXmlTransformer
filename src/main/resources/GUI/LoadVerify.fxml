@@ -19,14 +19,14 @@
         <HBox>
             <VBox>
                 <!-- Label for the original ontology editor -->
-                <Label text="Ontology Editor"/>
+                <Label text="Ontology Editor" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
                 <!-- ListView to display the ontology with errors -->
                 <ListView fx:id="ontologyListView" prefHeight="300" prefWidth="500"/>
             </VBox>
 
             <VBox>
                 <!-- Label for the transformed ontology -->
-                <Label text="Transformed Ontology"/>
+                <Label text="Transformed Ontology" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
                 <!-- ListView to display the transformed ontology -->
                 <ListView fx:id="ontologyTransformedListView" prefHeight="300" prefWidth="500"/>
             </VBox>
