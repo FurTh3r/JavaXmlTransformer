@@ -61,8 +61,6 @@ This project integrates **Java** and **CDuce** to create a comprehensive ecosyst
 
 ![Main interface correct_ontology](images/correctOntology.png)
 
-![Main interface ontology_editor](images/gui-screenshot.png)
-
 ## 📖 Reference Thesis
 
 Lorenzo Pasini, *Strumenti formali e user-friendly per la manipolazione di strutture ontologiche*  
